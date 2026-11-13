@@ -1,0 +1,28 @@
+{
+  "nivel" : "pacotes",
+  "metricas" : {
+    "vertices" : 9,
+    "arestas" : 27,
+    "componentes" : 3,
+    "componentesComCiclo" : 1,
+    "maiorComponente" : 7,
+    "verticesEmCiclos" : 7,
+    "percentualEmCiclos" : 77.77777777777777,
+    "tempoMilissegundos" : 0.062
+  },
+  "componentes" : [ {
+    "id" : 0,
+    "tamanho" : 7,
+    "vertices" : [ "com.google.gson", "com.google.gson.internal", "com.google.gson.internal.bind", "com.google.gson.internal.reflect", "com.google.gson.internal.sql", "com.google.gson.reflect", "com.google.gson.stream" ]
+  }, {
+    "id" : 1,
+    "tamanho" : 1,
+    "vertices" : [ "com.google.gson.annotations" ]
+  }, {
+    "id" : 2,
+    "tamanho" : 1,
+    "vertices" : [ "com.google.gson.internal.bind.util" ]
+  } ],
+  "passos" : [ ],
+  "observacaoPassos" : null
+}

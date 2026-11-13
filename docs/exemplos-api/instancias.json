@@ -1,0 +1,37 @@
+[ {
+  "nome" : "01-exemplo-sala.txt",
+  "tipo" : "arestas",
+  "tamanhoEmBytes" : 188
+}, {
+  "nome" : "02-camadas-sem-ciclos.txt",
+  "tipo" : "arestas",
+  "tamanhoEmBytes" : 426
+}, {
+  "nome" : "03-ciclo-total.txt",
+  "tipo" : "arestas",
+  "tamanhoEmBytes" : 397
+}, {
+  "nome" : "commons-lang3-3.12.0.jar",
+  "tipo" : "jar",
+  "tamanhoEmBytes" : 587402
+}, {
+  "nome" : "commons-lang3-3.20.0.jar",
+  "tipo" : "jar",
+  "tamanhoEmBytes" : 713862
+}, {
+  "nome" : "gson-2.10.1.jar",
+  "tipo" : "jar",
+  "tamanhoEmBytes" : 283367
+}, {
+  "nome" : "hibernate-core-6.5.2.Final.jar",
+  "tipo" : "jar",
+  "tamanhoEmBytes" : 11778543
+}, {
+  "nome" : "spring-core-6.1.12.jar",
+  "tipo" : "jar",
+  "tamanhoEmBytes" : 1882923
+}, {
+  "nome" : "tomcat-embed-core-10.1.28.jar",
+  "tipo" : "jar",
+  "tamanhoEmBytes" : 3553468
+} ]

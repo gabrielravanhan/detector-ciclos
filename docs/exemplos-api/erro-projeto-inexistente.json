@@ -1,0 +1,7 @@
+{
+  "timestamp" : "2026-11-13T20:32:54.558206100Z",
+  "status" : 404,
+  "erro" : "Not Found",
+  "mensagem" : "Projeto \"g999\" não encontrado. Carregue-o novamente.",
+  "path" : "/api/projetos/g999/grafo"
+}

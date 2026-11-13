@@ -1,0 +1,81 @@
+{
+  "nivel" : "informado",
+  "vertices" : [ {
+    "id" : "A",
+    "rotulo" : "A",
+    "grupo" : null
+  }, {
+    "id" : "B",
+    "rotulo" : "B",
+    "grupo" : null
+  }, {
+    "id" : "C",
+    "rotulo" : "C",
+    "grupo" : null
+  }, {
+    "id" : "D",
+    "rotulo" : "D",
+    "grupo" : null
+  }, {
+    "id" : "E",
+    "rotulo" : "E",
+    "grupo" : null
+  }, {
+    "id" : "F",
+    "rotulo" : "F",
+    "grupo" : null
+  }, {
+    "id" : "G",
+    "rotulo" : "G",
+    "grupo" : null
+  }, {
+    "id" : "H",
+    "rotulo" : "H",
+    "grupo" : null
+  }, {
+    "id" : "I",
+    "rotulo" : "I",
+    "grupo" : null
+  } ],
+  "arestas" : [ {
+    "origem" : "A",
+    "destino" : "B",
+    "peso" : 1
+  }, {
+    "origem" : "B",
+    "destino" : "C",
+    "peso" : 1
+  }, {
+    "origem" : "B",
+    "destino" : "D",
+    "peso" : 1
+  }, {
+    "origem" : "C",
+    "destino" : "A",
+    "peso" : 1
+  }, {
+    "origem" : "D",
+    "destino" : "E",
+    "peso" : 1
+  }, {
+    "origem" : "E",
+    "destino" : "F",
+    "peso" : 1
+  }, {
+    "origem" : "F",
+    "destino" : "D",
+    "peso" : 1
+  }, {
+    "origem" : "G",
+    "destino" : "F",
+    "peso" : 1
+  }, {
+    "origem" : "G",
+    "destino" : "H",
+    "peso" : 1
+  }, {
+    "origem" : "H",
+    "destino" : "G",
+    "peso" : 1
+  } ]
+}

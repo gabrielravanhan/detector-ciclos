@@ -1,0 +1,10 @@
+{
+  "id" : "g1",
+  "nome" : "01-exemplo-sala.txt",
+  "origem" : "lista de arestas",
+  "niveis" : [ {
+    "nivel" : "informado",
+    "vertices" : 9,
+    "arestas" : 10
+  } ]
+}

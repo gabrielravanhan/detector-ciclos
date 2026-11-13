@@ -1,0 +1,56 @@
+{
+  "nivel" : "informado",
+  "metricas" : {
+    "vertices" : 9,
+    "arestas" : 10,
+    "componentes" : 4,
+    "componentesComCiclo" : 3,
+    "maiorComponente" : 3,
+    "verticesEmCiclos" : 8,
+    "percentualEmCiclos" : 88.88888888888889,
+    "tempoMilissegundos" : 3.1086
+  },
+  "componentes" : [ {
+    "id" : 0,
+    "tamanho" : 3,
+    "vertices" : [ "A", "C", "B" ]
+  }, {
+    "id" : 1,
+    "tamanho" : 3,
+    "vertices" : [ "D", "F", "E" ]
+  }, {
+    "id" : 2,
+    "tamanho" : 2,
+    "vertices" : [ "G", "H" ]
+  }, {
+    "id" : 3,
+    "tamanho" : 1,
+    "vertices" : [ "I" ]
+  } ],
+  "passos" : [ {
+    "iteracao" : 0,
+    "pivo" : "A",
+    "niveisSucessores" : [ [ "A" ], [ "B" ], [ "C", "D" ], [ "E" ], [ "F" ] ],
+    "niveisAntecessores" : [ [ "A" ], [ "C" ], [ "B" ] ],
+    "componente" : [ "A", "C", "B" ]
+  }, {
+    "iteracao" : 1,
+    "pivo" : "D",
+    "niveisSucessores" : [ [ "D" ], [ "E" ], [ "F" ] ],
+    "niveisAntecessores" : [ [ "D" ], [ "F" ], [ "E", "G" ], [ "H" ] ],
+    "componente" : [ "D", "F", "E" ]
+  }, {
+    "iteracao" : 2,
+    "pivo" : "G",
+    "niveisSucessores" : [ [ "G" ], [ "H" ] ],
+    "niveisAntecessores" : [ [ "G" ], [ "H" ] ],
+    "componente" : [ "G", "H" ]
+  }, {
+    "iteracao" : 3,
+    "pivo" : "I",
+    "niveisSucessores" : [ [ "I" ] ],
+    "niveisAntecessores" : [ [ "I" ] ],
+    "componente" : [ "I" ]
+  } ],
+  "observacaoPassos" : null
+}
