@@ -1,4 +1,4 @@
-package br.unisagrado.ciclos.api;
+package br.unisagrado.ciclos.projeto;
 
 import br.unisagrado.ciclos.algoritmo.Malgrange;
 import br.unisagrado.ciclos.algoritmo.ResultadoMalgrange;

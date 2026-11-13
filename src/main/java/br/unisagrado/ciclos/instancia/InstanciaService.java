@@ -1,4 +1,10 @@
-package br.unisagrado.ciclos.api;
+package br.unisagrado.ciclos.instancia;
+
+import br.unisagrado.ciclos.common.exception.NaoEncontradoException;
+import br.unisagrado.ciclos.instancia.dto.response.InstanciaResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -7,24 +13,23 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 /**
  * Instâncias prontas para a demonstração: arquivos .jar/.war e .txt (lista de arestas) de uma pasta.
+ * A pasta vem da propriedade "instancias" (application.yaml ou --instancias=...).
  */
-public final class CatalogoDeInstancias {
-
-    public record Instancia(
-            String nome,
-            String tipo,
-            long tamanhoEmBytes
-    ) {
-    }
+@Service
+public class InstanciaService {
 
     private final Path pasta;
 
-    public CatalogoDeInstancias(Path pasta) {
+    @Autowired
+    public InstanciaService(@Value("${instancias}") String pasta) {
+        this(Path.of(pasta));
+    }
+
+    public InstanciaService(Path pasta) {
         this.pasta = pasta;
     }
 
@@ -37,17 +42,17 @@ public final class CatalogoDeInstancias {
         return nomeDoArquivo.endsWith(".jar") || nomeDoArquivo.endsWith(".war");
     }
 
-    public List<Instancia> listar() {
+    public List<InstanciaResponse> listar() {
         if (!Files.isDirectory(pasta)) {
             return List.of();
         }
-        List<Instancia> instancias = new ArrayList<>();
+        List<InstanciaResponse> instancias = new ArrayList<>();
         try (Stream<Path> arquivos = Files.list(pasta)) {
             for (Path arquivo : arquivos.sorted(Comparator.comparing(Path::getFileName)).toList()) {
                 String nome = arquivo.getFileName().toString();
                 String tipo = ehArquivoCompilado(nome) ? "jar" : nome.endsWith(".txt") ? "arestas" : null;
                 if (tipo != null && Files.isRegularFile(arquivo)) {
-                    instancias.add(new Instancia(nome, tipo, Files.size(arquivo)));
+                    instancias.add(new InstanciaResponse(nome, tipo, Files.size(arquivo)));
                 }
             }
         } catch (IOException e) {
@@ -58,11 +63,11 @@ public final class CatalogoDeInstancias {
 
     /** Só aceita nomes que estão na listagem (impede acessar arquivos fora da pasta). */
     public Path resolver(String nome) {
-        for (Instancia instancia : listar()) {
+        for (InstanciaResponse instancia : listar()) {
             if (instancia.nome().equals(nome)) {
                 return pasta.resolve(instancia.nome());
             }
         }
-        throw new NoSuchElementException("Instância \"" + nome + "\" não encontrada em " + pasta);
+        throw new NaoEncontradoException("Instância \"" + nome + "\" não encontrada em " + pasta);
     }
 }

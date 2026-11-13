@@ -1,6 +1,6 @@
 'use strict';
 
-// Interface do Detector de Ciclos. Conversa com a API REST (ver ServidorApi.java) e usa o
+// Interface do Detector de Ciclos. Conversa com a API REST (ver ProjetoController.java) e usa o
 // Cytoscape.js apenas para desenhar; todo o cálculo (Malgrange, condensação, ciclos) é feito no Java.
 
 const NOMES_DOS_NIVEIS = { pacotes: 'Pacotes', classes: 'Classes', informado: 'Grafo informado' };
@@ -14,7 +14,7 @@ const LIMITE_DE_PASSOS_MOSTRADOS = 300;
 const PREFIXO_DA_CAIXA_DE_PACOTE = 'pacote:';
 
 const estado = {
-    idDoGrafo: null,
+    idDoProjeto: null,
     nivel: null,
     grafo: null,               // { nivel, vertices, arestas }
     resultado: null,           // resposta do Malgrange
@@ -36,7 +36,7 @@ async function chamarApi(metodo, url, corpo) {
     const ehJson = (resposta.headers.get('content-type') || '').includes('json');
     const dados = ehJson ? await resposta.json() : await resposta.text();
     if (!resposta.ok) {
-        throw new Error((dados && dados.erro) || dados || resposta.statusText);
+        throw new Error((dados && dados.mensagem) || dados || resposta.statusText);
     }
     return dados;
 }
@@ -89,8 +89,8 @@ async function carregarListaDeInstancias() {
     }
 }
 
-async function grafoCarregado(resumo) {
-    estado.idDoGrafo = resumo.idDoGrafo;
+async function projetoCarregado(resumo) {
+    estado.idDoProjeto = resumo.id;
     $('info-grafo').textContent = `${resumo.nome}: ` + resumo.niveis
         .map(n => `${NOMES_DOS_NIVEIS[n.nivel]} ${n.vertices} vértices / ${n.arestas} arestas`).join(' · ');
 
@@ -105,7 +105,7 @@ async function mostrarGrafo(nivel) {
     estado.nivel = nivel;
     limparResultados();
     mostrarAba('grafo');
-    estado.grafo = await chamarApi('GET', `/api/grafos/${estado.idDoGrafo}?nivel=${nivel}`);
+    estado.grafo = await chamarApi('GET', `/api/projetos/${estado.idDoProjeto}/grafo?nivel=${nivel}`);
     desenharGrafo();
 }
 
@@ -372,7 +372,7 @@ function aplicarFiltroDeCiclos() {
 async function executarMalgrange() {
     const registrarPassos = $('registrar-passos').checked;
     const resultado = await chamarApi('POST',
-        `/api/grafos/${estado.idDoGrafo}/malgrange?nivel=${estado.nivel}&passos=${registrarPassos}`);
+        `/api/projetos/${estado.idDoProjeto}/malgrange?nivel=${estado.nivel}&passos=${registrarPassos}`);
     estado.resultado = resultado;
 
     definirCores(resultado.componentes);
@@ -384,7 +384,7 @@ async function executarMalgrange() {
     $('so-ciclos').disabled = false;
     if ($('so-ciclos').checked) aplicarFiltroDeCiclos();
 
-    estado.condensacao = await chamarApi('GET', `/api/grafos/${estado.idDoGrafo}/condensacao?nivel=${estado.nivel}`);
+    estado.condensacao = await chamarApi('GET', `/api/projetos/${estado.idDoProjeto}/condensacao?nivel=${estado.nivel}`);
     if (desenhoCondensado) {
         desenhoCondensado.destroy();
         desenhoCondensado = null;
@@ -445,7 +445,7 @@ async function selecionarComponente(componente) {
     document.querySelectorAll('.componente').forEach(item =>
         item.classList.toggle('selecionada', Number(item.dataset.id) === componente.id));
     const ciclo = await chamarApi('GET',
-        `/api/grafos/${estado.idDoGrafo}/componentes/${componente.id}/ciclo?nivel=${estado.nivel}`);
+        `/api/projetos/${estado.idDoProjeto}/componentes/${componente.id}/ciclo?nivel=${estado.nivel}`);
     mostrarCiclo(ciclo);
     destacar(componente, ciclo);
 }
@@ -544,18 +544,18 @@ document.querySelectorAll('.abas button').forEach(botao =>
 $('carregar-instancia').addEventListener('click', () => protegido(async () => {
     const nome = $('lista-instancias').value;
     if (!nome) throw new Error('Nenhuma instância selecionada.');
-    await grafoCarregado(await chamarApi('POST', `/api/grafos/instancia/${encodeURIComponent(nome)}`));
+    await projetoCarregado(await chamarApi('POST', `/api/projetos/instancia/${encodeURIComponent(nome)}`));
 }));
 
 $('enviar-jar').addEventListener('click', () => protegido(async () => {
     const arquivo = $('arquivo-jar').files[0];
     if (!arquivo) throw new Error('Escolha um arquivo .jar ou .war.');
-    await grafoCarregado(await chamarApi('POST',
-        `/api/grafos/envio?arquivo=${encodeURIComponent(arquivo.name)}`, arquivo));
+    await projetoCarregado(await chamarApi('POST',
+        `/api/projetos/envio?arquivo=${encodeURIComponent(arquivo.name)}`, arquivo));
 }));
 
 $('carregar-arestas').addEventListener('click', () => protegido(async () => {
-    await grafoCarregado(await chamarApi('POST', '/api/grafos/arestas?nome=grafo%20manual', $('texto-arestas').value));
+    await projetoCarregado(await chamarApi('POST', '/api/projetos/arestas?nome=grafo%20manual', $('texto-arestas').value));
 }));
 
 $('nivel').addEventListener('change', evento => protegido(() => mostrarGrafo(evento.target.value)));

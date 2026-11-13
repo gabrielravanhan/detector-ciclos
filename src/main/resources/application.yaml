@@ -1,0 +1,10 @@
+# Pode ser trocado na linha de comando: java -jar target/detector-ciclos.jar --porta=8080
+server:
+  port: ${porta:7070}
+
+# Pasta com as instâncias prontas (.txt, .jar, .war): --instancias=outra/pasta
+instancias: instancias
+
+spring:
+  main:
+    banner-mode: off
