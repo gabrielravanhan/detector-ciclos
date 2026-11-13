@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detector de Ciclos</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Cytoscape.js empacotado no jar (webjar): funciona sem internet -->
+    <script src="/webjars/cytoscape/3.30.2/dist/cytoscape.min.js"></script>
+</head>
+<body>
+<header>
+    <h1>Detector de Ciclos de Dependência</h1>
+    <span class="subtitulo">Componentes fortemente conexas com o algoritmo de Malgrange</span>
+</header>
+
+<main>
+    <aside id="painel-entrada">
+        <section>
+            <h2>1. Entrada</h2>
+            <label for="lista-instancias">Instância pronta</label>
+            <div class="linha">
+                <select id="lista-instancias"></select>
+                <button id="carregar-instancia">Carregar</button>
+            </div>
+
+            <label for="arquivo-jar">Enviar um .jar ou .war</label>
+            <div class="linha">
+                <input type="file" id="arquivo-jar" accept=".jar,.war">
+                <button id="enviar-jar">Enviar</button>
+            </div>
+
+            <label for="texto-arestas">Lista de arestas</label>
+            <textarea id="texto-arestas" rows="7" spellcheck="false" placeholder="# uma aresta por linha&#10;A -> B&#10;B -> C&#10;C -> A&#10;C -> D"></textarea>
+            <button id="carregar-arestas">Carregar arestas</button>
+        </section>
+
+        <section>
+            <h2>2. Execução</h2>
+            <div id="info-grafo" class="apagado">Nenhum grafo carregado.</div>
+            <label for="nivel">Granularidade</label>
+            <select id="nivel" disabled></select>
+            <label class="opcao"><input type="checkbox" id="registrar-passos" checked> Registrar passos (Γ⁺ e Γ⁻)</label>
+            <button id="executar" class="principal" disabled>Executar Malgrange</button>
+        </section>
+
+        <section id="secao-metricas" hidden>
+            <h2>3. Métricas</h2>
+            <dl id="metricas"></dl>
+        </section>
+    </aside>
+
+    <section id="conteudo">
+        <nav class="abas">
+            <button data-aba="grafo" class="ativa">Grafo</button>
+            <button data-aba="condensado">Grafo condensado</button>
+            <button data-aba="passos">Passo a passo</button>
+        </nav>
+        <div id="mensagem" class="mensagem" hidden></div>
+        <div id="aba-grafo" class="aba ativa"><div id="desenho-grafo" class="desenho"></div></div>
+        <div id="aba-condensado" class="aba"><div id="desenho-condensado" class="desenho"></div></div>
+        <div id="aba-passos" class="aba rolagem"><div id="passos"></div></div>
+    </section>
+
+    <aside id="painel-resultados">
+        <h2>Componentes com ciclo</h2>
+        <div id="componentes" class="apagado">Execute o algoritmo.</div>
+        <h2>Ciclo selecionado</h2>
+        <div id="ciclo" class="apagado">Clique numa componente.</div>
+    </aside>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+:root {
+    --fundo: #f6f7f9;
+    --painel: #ffffff;
+    --texto: #1f2430;
+    --apagado: #6b7280;
+    --borda: #dde1e7;
+    --destaque: #2f6fdb;
+    --erro: #c62828;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    background: var(--fundo);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    padding: 10px 16px;
+    background: var(--painel);
+    border-bottom: 1px solid var(--borda);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+header h1 { font-size: 18px; margin: 0; }
+.subtitulo { color: var(--apagado); }
+
+main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 300px 1fr 320px;
+    min-height: 0;
+}
+
+aside, #conteudo { min-height: 0; }
+
+aside {
+    background: var(--painel);
+    padding: 12px 16px;
+    overflow-y: auto;
+}
+
+#painel-entrada { border-right: 1px solid var(--borda); }
+#painel-resultados { border-left: 1px solid var(--borda); }
+
+h2 { font-size: 14px; margin: 16px 0 8px; }
+section:first-child h2, #painel-resultados h2:first-child { margin-top: 0; }
+
+label { display: block; margin: 10px 0 4px; color: var(--apagado); font-size: 12px; }
+label.opcao { display: flex; gap: 6px; align-items: center; color: var(--texto); font-size: 13px; }
+
+.linha { display: flex; gap: 6px; }
+.linha > select, .linha > input { flex: 1; min-width: 0; }
+
+select, textarea, input[type=file], button {
+    font: inherit;
+    border: 1px solid var(--borda);
+    border-radius: 6px;
+    background: var(--painel);
+    padding: 6px 8px;
+}
+
+textarea { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 12px; resize: vertical; }
+select { width: 100%; }
+
+button { cursor: pointer; }
+button:disabled { opacity: .5; cursor: default; }
+button.principal { background: var(--destaque); border-color: var(--destaque); color: #fff; width: 100%; margin-top: 12px; padding: 8px; }
+#carregar-arestas { margin-top: 6px; width: 100%; }
+
+.apagado { color: var(--apagado); }
+
+dl { display: grid; grid-template-columns: auto auto; gap: 4px 12px; margin: 0; }
+dt { color: var(--apagado); }
+dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+#conteudo { display: flex; flex-direction: column; position: relative; }
+
+.abas { display: flex; gap: 4px; padding: 8px 12px 0; border-bottom: 1px solid var(--borda); }
+.abas button { border: none; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 8px 12px; }
+.abas button.ativa { border-bottom-color: var(--destaque); color: var(--destaque); }
+
+/* flutua sobre o desenho: se empurrasse o conteúdo, o Cytoscape ficaria com o tamanho errado */
+.mensagem {
+    position: absolute; top: 48px; left: 12px; right: 12px; z-index: 10;
+    padding: 8px 12px; border-radius: 6px; background: #fff4e5; border: 1px solid #f5c98b;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+}
+.mensagem.erro { background: #fdecea; border-color: #f5a3a3; color: var(--erro); }
+
+.aba { display: none; flex: 1; min-height: 0; }
+.aba.ativa { display: block; }
+.aba.rolagem { overflow-y: auto; padding: 12px; }
+.desenho { width: 100%; height: 100%; }
+
+.componente {
+    border: 1px solid var(--borda);
+    border-left: 6px solid var(--cor, #999);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+}
+.componente.selecionada { background: #eef3fc; }
+.componente small { display: block; color: var(--apagado); word-break: break-all; }
+
+.caminho-do-ciclo { font-family: ui-monospace, Consolas, monospace; font-size: 12px; word-break: break-all; }
+.evidencia { margin: 8px 0; font-size: 12px; }
+.evidencia ul { margin: 4px 0; padding-left: 18px; font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
+
+details.passo { background: var(--painel); border: 1px solid var(--borda); border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; }
+details.passo summary { cursor: pointer; }
+details.passo table { border-collapse: collapse; margin-top: 6px; width: 100%; }
+details.passo td { border-top: 1px solid var(--borda); padding: 3px 6px; vertical-align: top; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+details.passo td:first-child { white-space: nowrap; color: var(--apagado); font-family: inherit; }
