@@ -3,6 +3,7 @@ package br.unisagrado.ciclos.api;
 import br.unisagrado.ciclos.grafo.ListaDeArestas;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import io.javalin.http.staticfiles.Location;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Rotas da API REST. As respostas são montadas por {@link Respostas}.
+ * Rotas da API REST e arquivos da interface web. As respostas são montadas por {@link Respostas}.
  *
  * <pre>
  * GET  /api/instancias                              instâncias prontas
@@ -42,6 +43,10 @@ public final class ServidorApi {
         Javalin app = Javalin.create(configuracao -> {
             configuracao.showJavalinBanner = false;
             configuracao.http.maxRequestSize = 50_000_000L;
+            // a interface (index.html, style.css, app.js) fica em src/main/resources/public
+            configuracao.staticFiles.add("/public", Location.CLASSPATH);
+            // bibliotecas JavaScript empacotadas como jar (Cytoscape.js), servidas em /webjars/...
+            configuracao.staticFiles.enableWebjars();
         });
 
         app.get("/api/instancias", ctx -> ctx.json(catalogo.listar()));
