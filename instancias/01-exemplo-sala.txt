@@ -1,0 +1,13 @@
+# Exemplo pequeno para conferir o Malgrange à mão.
+# Resultado esperado (CFCs): {A, B, C}, {D, E, F}, {G, H}, {I}
+A -> B
+B -> C
+C -> A
+B -> D
+D -> E
+E -> F
+F -> D
+G -> F
+G -> H
+H -> G
+I

@@ -1,0 +1,10 @@
+# Caso de fronteira: todos os pacotes formam uma única CFC.
+# Um anel com "atalhos": o resultado esperado é uma CFC com os 6 vértices.
+com.app.web -> com.app.service
+com.app.service -> com.app.repository
+com.app.repository -> com.app.model
+com.app.model -> com.app.util
+com.app.util -> com.app.config
+com.app.config -> com.app.web
+com.app.service -> com.app.util 3
+com.app.model -> com.app.web

@@ -1,0 +1,11 @@
+# Arquitetura em camadas "limpa": um DAG.
+# Caso SEM solução não trivial: todas as CFCs têm um único vértice.
+com.loja.web -> com.loja.service
+com.loja.web -> com.loja.model
+com.loja.web -> com.loja.util
+com.loja.service -> com.loja.repository
+com.loja.service -> com.loja.model
+com.loja.service -> com.loja.util
+com.loja.repository -> com.loja.model
+com.loja.repository -> com.loja.util
+com.loja.model -> com.loja.util
