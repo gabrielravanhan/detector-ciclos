@@ -11,6 +11,7 @@ const COR_ARESTA = '#c9ced6';
 const COR_CICLO = '#c62828';
 const LIMITE_DE_VERTICES_DESENHADOS = 2500;
 const LIMITE_DE_PASSOS_MOSTRADOS = 300;
+const PREFIXO_DA_CAIXA_DE_PACOTE = 'pacote:';
 
 const estado = {
     idDoGrafo: null,
@@ -24,6 +25,7 @@ const estado = {
 
 let desenho = null;            // Cytoscape do grafo
 let desenhoCondensado = null;  // Cytoscape do grafo condensado
+let retiradosPeloFiltro = null; // elementos tirados do desenho pelo filtro "só vértices em ciclos"
 
 const $ = (id) => document.getElementById(id);
 
@@ -116,6 +118,8 @@ function limparResultados() {
     $('componentes').replaceChildren('Execute o algoritmo.');
     $('ciclo').replaceChildren('Clique numa componente.');
     $('passos').replaceChildren();
+    $('so-ciclos').checked = false;
+    $('so-ciclos').disabled = true;
     if (desenhoCondensado) {
         desenhoCondensado.destroy();
         desenhoCondensado = null;
@@ -129,20 +133,74 @@ function estiloBase() {
         { selector: 'node', style: {
             'background-color': COR_TRIVIAL, label: 'data(rotulo)', 'font-size': 11, color: '#1f2430',
             'text-valign': 'bottom', 'text-margin-y': 4, 'text-max-width': 180, 'text-wrap': 'ellipsis',
+            'text-background-color': '#ffffff', 'text-background-opacity': 0.85,
+            'text-background-padding': 2, 'text-background-shape': 'roundrectangle',
             // com pouco zoom os rótulos somem, em vez de virarem um borrão sobreposto
             'min-zoomed-font-size': 8 } },
         { selector: 'node[tamanho]', style: { width: 'data(tamanho)', height: 'data(tamanho)' } },
         { selector: 'node[cor]', style: { 'background-color': 'data(cor)' } },
+        // caixa de um pacote (nível de classes)
+        { selector: ':parent', style: {
+            shape: 'round-rectangle', 'background-color': '#eef1f6', 'background-opacity': 0.7,
+            'border-width': 1, 'border-color': COR_ARESTA, padding: 16,
+            'text-valign': 'top', 'font-size': 12, 'font-weight': 'bold', color: '#4b5563',
+            'text-background-opacity': 0, 'text-max-width': 400 } },
         { selector: 'edge', style: {
             width: 1, 'line-color': COR_ARESTA, 'target-arrow-color': COR_ARESTA,
             'target-arrow-shape': 'triangle', 'arrow-scale': 0.7, 'curve-style': 'bezier' } },
         { selector: 'edge[cor]', style: { width: 1.5, 'line-color': 'data(cor)', 'target-arrow-color': 'data(cor)' } },
         { selector: 'node.em-ciclo', style: { 'font-weight': 'bold', 'z-index': 5 } },
         { selector: '.esmaecido', style: { opacity: 0.08 } },
+        { selector: 'node.foco', style: { 'border-width': 3, 'border-color': '#2f6fdb' } },
         { selector: 'edge.ciclo', style: {
             width: 3, 'line-color': COR_CICLO, 'target-arrow-color': COR_CICLO, 'z-index': 10 } },
         { selector: 'node.ciclo', style: { 'border-width': 3, 'border-color': COR_CICLO } },
     ];
+}
+
+/**
+ * Layout por forças fCoSE: separa as caixas de pacotes sem sobreposição e leva em conta o
+ * tamanho dos rótulos, para que vértices e textos não fiquem uns sobre os outros.
+ */
+function opcoesDeLayout(quantidadeDeVertices) {
+    return {
+        name: 'fcose',
+        quality: quantidadeDeVertices <= 600 ? 'proof' : 'default',
+        animate: false,
+        randomize: true,
+        padding: 30,
+        nodeDimensionsIncludeLabels: true,
+        packComponents: true,
+        // valores ajustados medindo a sobreposição de rótulos e de caixas (Gson, nível de classes)
+        nodeSeparation: 180,
+        idealEdgeLength: () => 180,
+        nodeRepulsion: () => 400000,
+        edgeElasticity: () => 0.45,
+        // mantém as classes de um pacote juntas dentro da caixa
+        nestingFactor: 3,
+        gravityCompound: 4,
+        gravityRangeCompound: 0.8,
+        gravity: 0.25,
+        numIter: 2500,
+    };
+}
+
+/**
+ * Encurta os nomes de pacote removendo o prefixo comum a todos:
+ * com.google.gson, com.google.gson.internal → gson, internal.
+ */
+function nomesCurtosDosPacotes(pacotes) {
+    const partes = pacotes.map(p => p.split('.'));
+    let comuns = 0;
+    while (partes.length > 0
+           && partes.every(p => p.length > comuns && p[comuns] === partes[0][comuns])) {
+        comuns++;
+    }
+    return new Map(pacotes.map((pacote, i) => {
+        const resto = partes[i].slice(comuns);
+        // o pacote-raiz (igual ao prefixo comum) fica com o próprio último pedaço
+        return [pacote, resto.length > 0 ? resto.join('.') : partes[i][partes[i].length - 1]];
+    }));
 }
 
 function desenharGrafo() {
@@ -150,7 +208,8 @@ function desenharGrafo() {
         desenho.destroy();
         desenho = null;
     }
-    const { vertices, arestas } = estado.grafo;
+    retiradosPeloFiltro = null;
+    const { nivel, vertices, arestas } = estado.grafo;
     if (vertices.length > LIMITE_DE_VERTICES_DESENHADOS) {
         mostrarMensagem(`O grafo tem ${vertices.length} vértices; o desenho foi omitido ` +
             `(limite ${LIMITE_DE_VERTICES_DESENHADOS}). Execute o algoritmo e use o grafo condensado ` +
@@ -164,8 +223,23 @@ function desenharGrafo() {
         grau.set(a.origem, grau.get(a.origem) + 1);
         grau.set(a.destino, grau.get(a.destino) + 1);
     }
+    // no nível de classes, cada pacote vira uma caixa com as suas classes dentro
+    const porClasse = nivel === 'classes';
+    const pacotes = porClasse
+        ? [...new Set(vertices.map(v => v.grupo))]
+        : nivel === 'pacotes' ? vertices.map(v => v.id) : [];
+    const nomeCurto = nomesCurtosDosPacotes(pacotes);
+
     const elementos = [
-        ...vertices.map(v => ({ data: { id: v.id, rotulo: v.rotulo, tamanho: 12 + 4 * Math.sqrt(grau.get(v.id)) } })),
+        ...(porClasse
+            ? pacotes.map(p => ({ data: { id: PREFIXO_DA_CAIXA_DE_PACOTE + p, rotulo: nomeCurto.get(p) } }))
+            : []),
+        ...vertices.map(v => ({ data: {
+            id: v.id,
+            rotulo: nivel === 'pacotes' ? nomeCurto.get(v.id) : v.rotulo,
+            tamanho: 12 + 4 * Math.sqrt(grau.get(v.id)),
+            ...(porClasse ? { parent: PREFIXO_DA_CAIXA_DE_PACOTE + v.grupo } : {}),
+        } })),
         ...arestas.map((a, i) => ({ data: { id: 'a' + i, source: a.origem, target: a.destino, peso: a.peso } })),
     ];
 
@@ -173,21 +247,60 @@ function desenharGrafo() {
         container: $('desenho-grafo'),
         elements: elementos,
         style: estiloBase(),
-        layout: { name: 'cose', animate: false, padding: 30 },
+        layout: opcoesDeLayout(vertices.length),
         minZoom: 0.05,
         maxZoom: 3,
     });
+    if (arestas.length > 1500) {
+        desenho.edges().style('curve-style', 'straight'); // curvas custam caro em grafos densos
+    }
     desenho.on('tap', evento => {
         if (evento.target === desenho) limparDestaque();
     });
+    // ':childless' = vértices de verdade (as caixas de pacote têm filhos)
+    desenho.on('tap', 'node:childless', evento => focarVertice(evento.target));
+    desenho.on('mouseover', 'node:childless', evento => mostrarRotulos(evento.target));
+    desenho.on('mouseout', 'node:childless', evento => {
+        const vertice = evento.target;
+        if (!vertice.hasClass('foco') && !vertice.hasClass('rotulado')) esconderRotulos(vertice);
+    });
+    desenho.on('zoom', () => mostrarRotulos(desenho.nodes('.rotulado')));
+}
+
+/**
+ * Mostra o rótulo dos vértices num tamanho legível qualquer que seja o zoom (o rótulo normal
+ * some quando o zoom deixa a fonte pequena demais).
+ */
+function mostrarRotulos(vertices) {
+    const zoom = desenho.zoom();
+    vertices.style({ 'font-size': 13 / zoom, 'min-zoomed-font-size': 0, 'text-max-width': 400 / zoom, 'z-index': 100 });
+}
+
+function esconderRotulos(vertices) {
+    vertices.removeStyle('font-size min-zoomed-font-size text-max-width z-index');
+}
+
+/** Destaca o vértice clicado e seus vizinhos diretos (de quem ele depende e quem depende dele). */
+function focarVertice(vertice) {
+    const vizinhanca = vertice.closedNeighborhood();
+    desenho.batch(() => {
+        limparDestaque();
+        desenho.nodes(':childless').not(vizinhanca).addClass('esmaecido');
+        desenho.edges().not(vizinhanca).addClass('esmaecido');
+        vertice.addClass('foco');
+        vizinhanca.nodes().addClass('rotulado');
+        mostrarRotulos(vizinhanca.nodes());
+    });
+    mostrarMensagem(`${vertice.id()}: depende de ${vertice.outgoers('node').length} e é usado por ` +
+        `${vertice.incomers('node').length}. Clique no fundo para limpar.`);
 }
 
 /** Pinta cada CFC não trivial com uma cor; vértices fora de ciclos ficam cinza. */
 function colorirGrafo() {
     if (!desenho) return;
     desenho.batch(() => {
-        desenho.nodes().forEach(vertice => {
-            const cor = estado.corDaComponente.get(estado.componenteDoVertice.get(vertice.id()));
+        desenho.nodes(':childless').forEach(vertice => {
+            const cor =estado.corDaComponente.get(estado.componenteDoVertice.get(vertice.id()));
             if (cor) vertice.data('cor', cor); else vertice.removeData('cor');
             vertice.toggleClass('em-ciclo', Boolean(cor));
         });
@@ -210,10 +323,12 @@ function destacar(componente, ciclo) {
         arestasDoCiclo.add(ciclo.ciclo[i] + '\u0000' + ciclo.ciclo[i + 1]);
     }
     desenho.batch(() => {
-        desenho.elements().removeClass('esmaecido ciclo');
-        desenho.nodes().forEach(vertice => {
+        esconderRotulos(desenho.nodes('.rotulado, .foco'));
+        desenho.elements().removeClass('esmaecido ciclo foco rotulado');
+        // só os vértices de verdade: esmaecer a caixa de um pacote esmaeceria as classes dentro dela
+        desenho.nodes(':childless').forEach(vertice => {
             if (!membros.has(vertice.id())) vertice.addClass('esmaecido');
-            if (noCiclo.has(vertice.id())) vertice.addClass('ciclo');
+            if (noCiclo.has(vertice.id())) vertice.addClass('ciclo rotulado');
         });
         desenho.edges().forEach(aresta => {
             const origem = aresta.data('source');
@@ -222,12 +337,34 @@ function destacar(componente, ciclo) {
             if (arestasDoCiclo.has(origem + '\u0000' + destino)) aresta.addClass('ciclo');
         });
     });
-    desenho.fit(desenho.nodes().filter(vertice => membros.has(vertice.id())), 60);
+    desenho.fit(desenho.nodes(':childless').filter(vertice => membros.has(vertice.id())), 60);
+    mostrarRotulos(desenho.nodes('.rotulado'));
 }
 
 function limparDestaque() {
-    if (desenho) desenho.elements().removeClass('esmaecido ciclo');
+    if (desenho) {
+        esconderRotulos(desenho.nodes('.rotulado, .foco'));
+        desenho.elements().removeClass('esmaecido ciclo foco rotulado');
+    }
     document.querySelectorAll('.componente.selecionada').forEach(item => item.classList.remove('selecionada'));
+}
+
+/**
+ * Mostra só os vértices que estão em alguma CFC não trivial e reorganiza o desenho.
+ * Os demais saem do desenho (e voltam ao desmarcar), para o layout não reservar espaço para eles.
+ */
+function aplicarFiltroDeCiclos() {
+    if (!desenho) return;
+    if (retiradosPeloFiltro) {
+        retiradosPeloFiltro.restore();
+        retiradosPeloFiltro = null;
+    }
+    if ($('so-ciclos').checked) {
+        const foraDeCiclos = desenho.nodes(':childless').not('.em-ciclo');
+        const caixasVazias = desenho.nodes(':parent').filter(caixa => caixa.children().not(foraDeCiclos).empty());
+        retiradosPeloFiltro = desenho.remove(foraDeCiclos.union(caixasVazias));
+    }
+    desenho.layout(opcoesDeLayout(desenho.nodes(':childless').length)).run();
 }
 
 // ---------- execução do Malgrange ----------
@@ -244,6 +381,8 @@ async function executarMalgrange() {
     mostrarPassos(resultado);
     colorirGrafo();
     limparDestaque();
+    $('so-ciclos').disabled = false;
+    if ($('so-ciclos').checked) aplicarFiltroDeCiclos();
 
     estado.condensacao = await chamarApi('GET', `/api/grafos/${estado.idDoGrafo}/condensacao?nivel=${estado.nivel}`);
     if (desenhoCondensado) {
@@ -421,5 +560,6 @@ $('carregar-arestas').addEventListener('click', () => protegido(async () => {
 
 $('nivel').addEventListener('change', evento => protegido(() => mostrarGrafo(evento.target.value)));
 $('executar').addEventListener('click', () => protegido(executarMalgrange));
+$('so-ciclos').addEventListener('change', aplicarFiltroDeCiclos);
 
 protegido(carregarListaDeInstancias);

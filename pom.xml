@@ -44,6 +44,13 @@
             <artifactId>cytoscape</artifactId>
             <version>3.30.2</version>
         </dependency>
+        <!-- Layout fCoSE para o Cytoscape: só decide a POSIÇÃO dos vértices na tela, separando as
+             caixas de pacotes sem sobreposição. Traz junto o layout-base e o cose-base. -->
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>cytoscape-fcose</artifactId>
+            <version>2.2.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
