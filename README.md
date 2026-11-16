@@ -47,7 +47,6 @@ o Cytoscape.js vai empacotado dentro do jar.
 - **Passo a passo**: para cada iteração, o pivô, os níveis de Γ⁺ e Γ⁻ e a interseção
 - **Ciclo concreto** de cada CFC (o menor ciclo, por busca em largura) e as dependências entre
   classes que justificam cada aresta entre pacotes
-- **Grafo condensado** (DAG das CFCs) desenhado em camadas
 - Métricas: número de CFCs, maior CFC, % de vértices em ciclos, tempo de execução
 
 ## Modelagem do grafo
@@ -84,7 +83,7 @@ src/main/java/br/unisagrado/ciclos/
   Application.java   ponto de entrada (Spring Boot)
   grafo/             Digrafo: grafo direcionado ponderado (implementação própria); lista de arestas
   algoritmo/         Malgrange (+ registro dos passos)
-  analise/           grafo condensado, menor ciclo, métricas
+  analise/           menor ciclo, métricas
   extracao/          jdeps → dependências entre classes → grafos de classes e de pacotes
   projeto/           ProjetoController, ProjetoService, ProjetoRepository (em memória), dto/response
   instancia/         InstanciaController, InstanciaService (instâncias prontas), dto/response
@@ -107,7 +106,6 @@ docs/exemplos-api/   exemplos reais das respostas da API
 | GET | `/api/projetos/{id}/grafo?nivel=` | vértices e arestas |
 | GET | `/api/projetos/{id}/exportar?nivel=` | o grafo como lista de arestas (texto) |
 | POST | `/api/projetos/{id}/malgrange?nivel=&passos=true` | executa o Malgrange |
-| GET | `/api/projetos/{id}/condensacao?nivel=` | grafo condensado |
 | GET | `/api/projetos/{id}/componentes/{c}/ciclo?nivel=` | menor ciclo da CFC `c` |
 
 `nivel` é `pacotes`, `classes` ou `informado` (lista de arestas); se omitido, usa o primeiro
@@ -165,8 +163,8 @@ grafo de classes do Hibernate (o tempo exato aparece nas métricas de cada execu
 
 ## Bibliotecas utilizadas
 
-Nenhuma biblioteca de grafos é usada: o grafo, o Malgrange, o grafo condensado e a busca de
-ciclos foram implementados pelo grupo.
+Nenhuma biblioteca de grafos é usada: o grafo, o Malgrange e a busca de ciclos foram
+implementados pelo grupo.
 
 | Biblioteca | Uso |
 |---|---|
@@ -183,7 +181,6 @@ ciclos foram implementados pelo grupo.
 - exemplo de sala com resultado conhecido, incluindo os níveis de Γ⁺ e Γ⁻
 - DAG (sem ciclos), ciclo único, grafo vazio, laço
 - 300 grafos aleatórios comparados com a definição de CFC (alcance mútuo calculado por força bruta)
-- grafo condensado sempre acíclico
 - rotas da API testadas com MockMvc (sem abrir porta de rede)
 - a ferramenta analisa o próprio código compilado e verifica que não há ciclos entre os pacotes
   ([`ArquiteturaTest`](src/test/java/br/unisagrado/ciclos/ArquiteturaTest.java))

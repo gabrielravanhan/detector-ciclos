@@ -2,7 +2,6 @@ package br.unisagrado.ciclos.projeto;
 
 import br.unisagrado.ciclos.algoritmo.PassoMalgrange;
 import br.unisagrado.ciclos.analise.BuscadorDeCiclos;
-import br.unisagrado.ciclos.analise.Condensacao;
 import br.unisagrado.ciclos.common.exception.NaoEncontradoException;
 import br.unisagrado.ciclos.extracao.DependenciasDeClasses;
 import br.unisagrado.ciclos.extracao.ExecutorJdeps;
@@ -14,14 +13,12 @@ import br.unisagrado.ciclos.instancia.InstanciaService;
 import br.unisagrado.ciclos.projeto.dto.response.ArestaResponse;
 import br.unisagrado.ciclos.projeto.dto.response.CicloResponse;
 import br.unisagrado.ciclos.projeto.dto.response.ComponenteResponse;
-import br.unisagrado.ciclos.projeto.dto.response.CondensacaoResponse;
 import br.unisagrado.ciclos.projeto.dto.response.EvidenciaResponse;
 import br.unisagrado.ciclos.projeto.dto.response.GrafoResponse;
 import br.unisagrado.ciclos.projeto.dto.response.MalgrangeResponse;
 import br.unisagrado.ciclos.projeto.dto.response.NivelResponse;
 import br.unisagrado.ciclos.projeto.dto.response.PassoResponse;
 import br.unisagrado.ciclos.projeto.dto.response.ProjetoResponse;
-import br.unisagrado.ciclos.projeto.dto.response.VerticeCondensadoResponse;
 import br.unisagrado.ciclos.projeto.dto.response.VerticeResponse;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +34,7 @@ import java.util.Map;
 
 /**
  * Carrega projetos (instância pronta, .jar enviado ou lista de arestas) e responde às análises:
- * grafo, Malgrange, grafo condensado e ciclo de uma componente.
+ * grafo, Malgrange e ciclo de uma componente.
  */
 @Service
 public class ProjetoService {
@@ -146,29 +143,6 @@ public class ProjetoService {
                 : null;
 
         return new MalgrangeResponse(nivel, analise.metricas(), componentes, passos, observacao);
-    }
-
-    public CondensacaoResponse buscarCondensacao(String id, String nivelPedido) {
-        Projeto projeto = buscarProjeto(id);
-        String nivel = projeto.resolverNivel(nivelPedido);
-        Digrafo grafo = projeto.grafo(nivel);
-        List<List<Integer>> componentes = projeto.ultimaAnalise(nivel).resultado().componentes();
-        Condensacao condensacao = Condensacao.construir(grafo, componentes);
-
-        List<VerticeCondensadoResponse> vertices = new ArrayList<>();
-        for (int c = 0; c < componentes.size(); c++) {
-            List<Integer> membros = componentes.get(c);
-            String rotulo = membros.size() == 1
-                    ? grafo.nome(membros.get(0))
-                    : "CFC " + c + " (" + membros.size() + " vértices)";
-            vertices.add(new VerticeCondensadoResponse("c" + c, c, membros.size(), condensacao.camada()[c], rotulo));
-        }
-        List<ArestaResponse> arestas = new ArrayList<>();
-        for (Condensacao.Aresta aresta : condensacao.arestas()) {
-            arestas.add(new ArestaResponse("c" + aresta.origem(), "c" + aresta.destino(), aresta.peso()));
-        }
-        List<String> ordem = condensacao.ordemTopologica().stream().map(c -> "c" + c).toList();
-        return new CondensacaoResponse(nivel, vertices, arestas, ordem);
     }
 
     /**

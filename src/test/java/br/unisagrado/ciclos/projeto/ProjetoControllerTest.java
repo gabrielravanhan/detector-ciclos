@@ -30,7 +30,7 @@ class ProjetoControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void instanciaCarregadaPassaPeloMalgrangeCondensacaoECiclo() throws Exception {
+    void instanciaCarregadaPassaPeloMalgrangeECiclo() throws Exception {
         String projeto = "/api/projetos/" + carregar(post("/api/projetos/instancia/exemplo-sala.txt"));
 
         mockMvc.perform(get(projeto + "/grafo"))
@@ -42,9 +42,6 @@ class ProjetoControllerTest {
                 .andExpect(jsonPath("$.metricas.componentesComCiclo").value(3))
                 .andExpect(jsonPath("$.passos[0].pivo").value("A"))
                 .andExpect(jsonPath("$.passos[0].niveisAntecessores[1]", contains("C")));
-        mockMvc.perform(get(projeto + "/condensacao"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.vertices", hasSize(4)));
         mockMvc.perform(get(projeto + "/componentes/0/ciclo"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ciclo", contains("A", "B", "C", "A")));

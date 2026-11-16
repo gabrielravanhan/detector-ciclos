@@ -1,7 +1,7 @@
 'use strict';
 
 // Interface do Detector de Ciclos. Conversa com a API REST (ver ProjetoController.java) e usa o
-// Cytoscape.js apenas para desenhar; todo o cálculo (Malgrange, condensação, ciclos) é feito no Java.
+// Cytoscape.js apenas para desenhar; todo o cálculo (Malgrange, ciclos) é feito no Java.
 
 const NOMES_DOS_NIVEIS = { pacotes: 'Pacotes', classes: 'Classes', informado: 'Grafo informado' };
 const PALETA = ['#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4',
@@ -18,13 +18,11 @@ const estado = {
     nivel: null,
     grafo: null,               // { nivel, vertices, arestas }
     resultado: null,           // resposta do Malgrange
-    condensacao: null,
     corDaComponente: new Map(),       // id da CFC → cor
     componenteDoVertice: new Map(),   // nome do vértice → id da CFC
 };
 
 let desenho = null;            // Cytoscape do grafo
-let desenhoCondensado = null;  // Cytoscape do grafo condensado
 let retiradosPeloFiltro = null; // elementos tirados do desenho pelo filtro "só vértices em ciclos"
 
 const $ = (id) => document.getElementById(id);
@@ -111,7 +109,6 @@ async function mostrarGrafo(nivel) {
 
 function limparResultados() {
     estado.resultado = null;
-    estado.condensacao = null;
     estado.corDaComponente.clear();
     estado.componenteDoVertice.clear();
     $('secao-metricas').hidden = true;
@@ -120,10 +117,6 @@ function limparResultados() {
     $('passos').replaceChildren();
     $('so-ciclos').checked = false;
     $('so-ciclos').disabled = true;
-    if (desenhoCondensado) {
-        desenhoCondensado.destroy();
-        desenhoCondensado = null;
-    }
 }
 
 // ---------- desenho do grafo ----------
@@ -212,8 +205,8 @@ function desenharGrafo() {
     const { nivel, vertices, arestas } = estado.grafo;
     if (vertices.length > LIMITE_DE_VERTICES_DESENHADOS) {
         mostrarMensagem(`O grafo tem ${vertices.length} vértices; o desenho foi omitido ` +
-            `(limite ${LIMITE_DE_VERTICES_DESENHADOS}). Execute o algoritmo e use o grafo condensado ` +
-            'e a lista de componentes.');
+            `(limite ${LIMITE_DE_VERTICES_DESENHADOS}). Execute o algoritmo e use ` +
+            'a lista de componentes.');
         return;
     }
 
@@ -383,13 +376,6 @@ async function executarMalgrange() {
     limparDestaque();
     $('so-ciclos').disabled = false;
     if ($('so-ciclos').checked) aplicarFiltroDeCiclos();
-
-    estado.condensacao = await chamarApi('GET', `/api/projetos/${estado.idDoProjeto}/condensacao?nivel=${estado.nivel}`);
-    if (desenhoCondensado) {
-        desenhoCondensado.destroy();
-        desenhoCondensado = null;
-    }
-    if ($('aba-condensado').classList.contains('ativa')) desenharCondensacao();
     if (resultado.observacaoPassos) mostrarMensagem(resultado.observacaoPassos);
 }
 
@@ -495,47 +481,12 @@ function mostrarPassos(resultado) {
     }
 }
 
-// ---------- grafo condensado ----------
-
-/** Desenha o DAG das CFCs em camadas (camada = maior caminho até a CFC), de cima para baixo. */
-function desenharCondensacao() {
-    if (desenhoCondensado || !estado.condensacao) return;
-    const { vertices, arestas } = estado.condensacao;
-    if (vertices.length > LIMITE_DE_VERTICES_DESENHADOS) {
-        mostrarMensagem(`O grafo condensado tem ${vertices.length} vértices; o desenho foi omitido.`);
-        return;
-    }
-    const ocupadosPorCamada = new Map();
-    const elementos = vertices.map(v => {
-        const posicaoNaCamada = ocupadosPorCamada.get(v.camada) || 0;
-        ocupadosPorCamada.set(v.camada, posicaoNaCamada + 1);
-        return {
-            data: {
-                id: v.id,
-                rotulo: v.rotulo,
-                cor: estado.corDaComponente.get(v.componente) || COR_TRIVIAL,
-                tamanho: 14 + 6 * Math.sqrt(v.tamanho - 1),
-            },
-            position: { x: posicaoNaCamada * 110, y: v.camada * 110 },
-        };
-    });
-    elementos.push(...arestas.map((a, i) => ({ data: { id: 'ca' + i, source: a.origem, target: a.destino } })));
-
-    desenhoCondensado = cytoscape({
-        container: $('desenho-condensado'),
-        elements: elementos,
-        style: estiloBase(),
-        layout: { name: 'preset' },
-    });
-}
-
 // ---------- abas e eventos ----------
 
 function mostrarAba(nome) {
     document.querySelectorAll('.abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === nome));
     document.querySelectorAll('.aba').forEach(aba => aba.classList.toggle('ativa', aba.id === 'aba-' + nome));
     if (nome === 'grafo' && desenho) desenho.resize();
-    if (nome === 'condensado') desenharCondensacao();
 }
 
 document.querySelectorAll('.abas button').forEach(botao =>

@@ -112,11 +112,6 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void condensadoTemUmVerticePorComponente() {
-        assertEquals(2, projetoService.buscarCondensacao(id, null).vertices().size());
-    }
-
-    @Test
     void evidenciaListaAsClassesQueCriamOCicloEntrePacotes() {
         Digrafo classes = MontadorDeGrafos.grafoDeClasses(LeitorSaidaJdeps.ler("""
                    com.app.web.Controller    -> com.app.service.Service   app.jar
