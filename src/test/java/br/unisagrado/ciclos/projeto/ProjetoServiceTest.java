@@ -5,7 +5,6 @@ import br.unisagrado.ciclos.extracao.LeitorSaidaJdeps;
 import br.unisagrado.ciclos.extracao.MontadorDeGrafos;
 import br.unisagrado.ciclos.grafo.Digrafo;
 import br.unisagrado.ciclos.instancia.InstanciaService;
-import br.unisagrado.ciclos.projeto.dto.response.CicloResponse;
 import br.unisagrado.ciclos.projeto.dto.response.GrafoResponse;
 import br.unisagrado.ciclos.projeto.dto.response.MalgrangeResponse;
 import br.unisagrado.ciclos.projeto.dto.response.NivelResponse;
@@ -18,6 +17,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -103,16 +103,7 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void cicloSegueAsArestasDoGrafo() {
-        projetoService.executarMalgrange(id, null, false);
-        CicloResponse ciclo = projetoService.buscarCiclo(id, null, 1, null);
-
-        assertEquals(List.of("D", "E", "F", "D"), ciclo.ciclo());
-        assertEquals(3, ciclo.arestas().size());
-    }
-
-    @Test
-    void evidenciaListaAsClassesQueCriamOCicloEntrePacotes() {
+    void malgrangeEncontraCicloEntrePacotes() {
         Digrafo classes = MontadorDeGrafos.grafoDeClasses(LeitorSaidaJdeps.ler("""
                    com.app.web.Controller    -> com.app.service.Service   app.jar
                    com.app.service.Service   -> com.app.web.Formatador    app.jar
@@ -123,19 +114,15 @@ class ProjetoServiceTest {
         grafos.put(Projeto.NIVEL_CLASSES, classes);
         String comCiclo = projetoRepository.criar("app", "jar", grafos).id();
 
-        projetoService.executarMalgrange(comCiclo, Projeto.NIVEL_PACOTES, false);
-        CicloResponse ciclo = projetoService.buscarCiclo(comCiclo, Projeto.NIVEL_PACOTES, 0, null);
+        MalgrangeResponse resposta = projetoService.executarMalgrange(comCiclo, Projeto.NIVEL_PACOTES, false);
 
-        assertEquals(List.of("com.app.service", "com.app.web", "com.app.service"), ciclo.ciclo());
-        assertEquals(List.of("com.app.service.Service -> com.app.web.Formatador"),
-                ciclo.arestas().get(0).dependenciasDeClasses());
+        assertEquals(1, resposta.componentes().size(), "web e service se usam: uma única CFC");
+        assertEquals(Set.of("com.app.service", "com.app.web"), Set.copyOf(resposta.componentes().get(0).vertices()));
     }
 
     @Test
     void pedidosInvalidosSaoRecusados() {
         assertThrows(IllegalArgumentException.class, () -> projetoService.buscarGrafo(id, "classes"));
-        assertThrows(NaoEncontradoException.class, () -> projetoService.buscarCiclo(id, null, 99, null));
-        assertThrows(IllegalArgumentException.class, () -> projetoService.buscarCiclo(id, null, 0, "D"));
         assertThrows(NaoEncontradoException.class, () -> projetoService.buscarGrafo("g999", null));
         assertThrows(IllegalArgumentException.class, () -> projetoService.carregarArquivo("foto.png", null));
     }

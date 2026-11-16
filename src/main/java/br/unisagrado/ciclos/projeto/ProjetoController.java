@@ -1,6 +1,5 @@
 package br.unisagrado.ciclos.projeto;
 
-import br.unisagrado.ciclos.projeto.dto.response.CicloResponse;
 import br.unisagrado.ciclos.projeto.dto.response.GrafoResponse;
 import br.unisagrado.ciclos.projeto.dto.response.MalgrangeResponse;
 import br.unisagrado.ciclos.projeto.dto.response.ProjetoResponse;
@@ -26,7 +25,6 @@ import java.io.InputStream;
  * GET  /api/projetos/{id}/grafo?nivel=                   vértices e arestas
  * GET  /api/projetos/{id}/exportar?nivel=                o grafo como lista de arestas (texto)
  * POST /api/projetos/{id}/malgrange?nivel=&amp;passos=true      executa o Malgrange
- * GET  /api/projetos/{id}/componentes/{c}/ciclo?nivel=&amp;inicio=   ciclo concreto na CFC c
  * </pre>
  */
 @RestController
@@ -72,13 +70,5 @@ public class ProjetoController {
                                                @RequestParam(required = false) String nivel,
                                                @RequestParam(defaultValue = "false") boolean passos) {
         return projetoService.executarMalgrange(id, nivel, passos);
-    }
-
-    @GetMapping("/{id}/componentes/{componente}/ciclo")
-    public CicloResponse buscarCiclo(@PathVariable String id,
-                                     @PathVariable int componente,
-                                     @RequestParam(required = false) String nivel,
-                                     @RequestParam(required = false) String inicio) {
-        return projetoService.buscarCiclo(id, nivel, componente, inicio);
     }
 }

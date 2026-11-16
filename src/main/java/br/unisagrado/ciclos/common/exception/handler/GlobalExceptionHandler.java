@@ -29,7 +29,7 @@ class GlobalExceptionHandler {
         return responder(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
     }
 
-    // Parâmetro da URL com tipo errado, ex.: /componentes/abc/ciclo
+    // Parâmetro da URL com tipo errado, ex.: /malgrange?passos=abc
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<ErroResponse> handleParametroInvalido(MethodArgumentTypeMismatchException exception,
                                                          HttpServletRequest request) {

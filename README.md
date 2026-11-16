@@ -45,8 +45,7 @@ o Cytoscape.js vai empacotado dentro do jar.
 - Executar o Malgrange e ver as CFCs coloridas no grafo; opção para mostrar só os vértices em ciclos
 - Passar o mouse sobre um vértice mostra o nome; clicar destaca seus vizinhos diretos
 - **Passo a passo**: para cada iteração, o pivô, os níveis de Γ⁺ e Γ⁻ e a interseção
-- **Ciclo concreto** de cada CFC (o menor ciclo, por busca em largura) e as dependências entre
-  classes que justificam cada aresta entre pacotes
+- Clicar numa CFC da lista destaca os vértices dela no grafo
 - Métricas: número de CFCs, maior CFC, % de vértices em ciclos, tempo de execução
 
 ## Modelagem do grafo
@@ -82,7 +81,7 @@ src/main/java/br/unisagrado/ciclos/
   Application.java   ponto de entrada (Spring Boot)
   grafo/             Digrafo: grafo direcionado (implementação própria); lista de arestas
   algoritmo/         Malgrange (+ registro dos passos)
-  analise/           menor ciclo, métricas
+  analise/           métricas
   extracao/          jdeps → dependências entre classes → grafos de classes e de pacotes
   projeto/           ProjetoController, ProjetoService, ProjetoRepository (em memória), dto/response
   instancia/         InstanciaController, InstanciaService (instâncias prontas), dto/response
@@ -105,7 +104,6 @@ docs/exemplos-api/   exemplos reais das respostas da API
 | GET | `/api/projetos/{id}/grafo?nivel=` | vértices e arestas |
 | GET | `/api/projetos/{id}/exportar?nivel=` | o grafo como lista de arestas (texto) |
 | POST | `/api/projetos/{id}/malgrange?nivel=&passos=true` | executa o Malgrange |
-| GET | `/api/projetos/{id}/componentes/{c}/ciclo?nivel=` | menor ciclo da CFC `c` |
 
 `nivel` é `pacotes`, `classes` ou `informado` (lista de arestas); se omitido, usa o primeiro
 nível do projeto. Os passos (`passos=true`) só são registrados para grafos de até 500 vértices.
@@ -161,8 +159,7 @@ grafo de classes do Hibernate (o tempo exato aparece nas métricas de cada execu
 
 ## Bibliotecas utilizadas
 
-Nenhuma biblioteca de grafos é usada: o grafo, o Malgrange e a busca de ciclos foram
-implementados pelo grupo.
+Nenhuma biblioteca de grafos é usada: o grafo e o Malgrange foram implementados pelo grupo.
 
 | Biblioteca | Uso |
 |---|---|
@@ -192,6 +189,9 @@ implementados pelo grupo.
 - Os passos do Malgrange só são registrados para até 500 vértices; o desenho do grafo, para até
   2.500.
 - Os projetos carregados ficam só em memória: somem quando a aplicação é fechada.
+- A ferramenta mostra quais vértices estão em ciclo (as CFCs), mas não sugere quais dependências
+  remover: escolher o menor conjunto de arestas cuja remoção elimina todos os ciclos é o problema
+  do conjunto mínimo de arestas de retroalimentação (*feedback arc set*), que é NP-difícil.
 
 ## Uso de Inteligência Artificial
 

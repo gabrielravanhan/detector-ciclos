@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ProjetoTest {
@@ -23,9 +22,10 @@ class ProjetoTest {
     }
 
     @Test
-    void ultimaAnaliseReaproveitaOResultado() {
+    void analisarExecutaOMalgrangeNoNivelPedido() {
         Projeto.Analise analise = projeto.analisar(null, false);
 
-        assertSame(analise, projeto.ultimaAnalise(null));
+        assertEquals(1, analise.resultado().componentes().size(), "a e b se usam: uma única CFC");
+        assertEquals(1, analise.metricas().componentesComCiclo());
     }
 }

@@ -8,7 +8,6 @@ const PALETA = ['#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4'
                 '#f032e6', '#9a6324', '#808000', '#469990', '#000075', '#800000'];
 const COR_TRIVIAL = '#b8bcc4';
 const COR_ARESTA = '#c9ced6';
-const COR_CICLO = '#c62828';
 const LIMITE_DE_VERTICES_DESENHADOS = 2500;
 const LIMITE_DE_PASSOS_MOSTRADOS = 300;
 const PREFIXO_DA_CAIXA_DE_PACOTE = 'pacote:';
@@ -113,7 +112,6 @@ function limparResultados() {
     estado.componenteDoVertice.clear();
     $('secao-metricas').hidden = true;
     $('componentes').replaceChildren('Execute o algoritmo.');
-    $('ciclo').replaceChildren('Clique numa componente.');
     $('passos').replaceChildren();
     $('so-ciclos').checked = false;
     $('so-ciclos').disabled = true;
@@ -145,9 +143,6 @@ function estiloBase() {
         { selector: 'node.em-ciclo', style: { 'font-weight': 'bold', 'z-index': 5 } },
         { selector: '.esmaecido', style: { opacity: 0.08 } },
         { selector: 'node.foco', style: { 'border-width': 3, 'border-color': '#2f6fdb' } },
-        { selector: 'edge.ciclo', style: {
-            width: 3, 'line-color': COR_CICLO, 'target-arrow-color': COR_CICLO, 'z-index': 10 } },
-        { selector: 'node.ciclo', style: { 'border-width': 3, 'border-color': COR_CICLO } },
     ];
 }
 
@@ -248,7 +243,10 @@ function desenharGrafo() {
         desenho.edges().style('curve-style', 'straight'); // curvas custam caro em grafos densos
     }
     desenho.on('tap', evento => {
-        if (evento.target === desenho) limparDestaque();
+        if (evento.target === desenho) {
+            limparDestaque();
+            mostrarMensagem('');
+        }
     });
     // ':childless' = vértices de verdade (as caixas de pacote têm filhos)
     desenho.on('tap', 'node:childless', evento => focarVertice(evento.target));
@@ -306,38 +304,30 @@ function colorirGrafo() {
     });
 }
 
-/** Apaga o que está fora da CFC e marca em vermelho o ciclo encontrado. */
-function destacar(componente, ciclo) {
+/** Apaga o que está fora da CFC e aproxima o desenho dos vértices dela. */
+function destacar(componente) {
     if (!desenho) return;
     const membros = new Set(componente.vertices);
-    const noCiclo = new Set(ciclo.ciclo);
-    const arestasDoCiclo = new Set();
-    for (let i = 0; i + 1 < ciclo.ciclo.length; i++) {
-        arestasDoCiclo.add(ciclo.ciclo[i] + '\u0000' + ciclo.ciclo[i + 1]);
-    }
     desenho.batch(() => {
         esconderRotulos(desenho.nodes('.rotulado, .foco'));
-        desenho.elements().removeClass('esmaecido ciclo foco rotulado');
+        desenho.elements().removeClass('esmaecido foco rotulado');
         // só os vértices de verdade: esmaecer a caixa de um pacote esmaeceria as classes dentro dela
         desenho.nodes(':childless').forEach(vertice => {
             if (!membros.has(vertice.id())) vertice.addClass('esmaecido');
-            if (noCiclo.has(vertice.id())) vertice.addClass('ciclo rotulado');
         });
         desenho.edges().forEach(aresta => {
-            const origem = aresta.data('source');
-            const destino = aresta.data('target');
-            if (!membros.has(origem) || !membros.has(destino)) aresta.addClass('esmaecido');
-            if (arestasDoCiclo.has(origem + '\u0000' + destino)) aresta.addClass('ciclo');
+            if (!membros.has(aresta.data('source')) || !membros.has(aresta.data('target'))) {
+                aresta.addClass('esmaecido');
+            }
         });
     });
     desenho.fit(desenho.nodes(':childless').filter(vertice => membros.has(vertice.id())), 60);
-    mostrarRotulos(desenho.nodes('.rotulado'));
 }
 
 function limparDestaque() {
     if (desenho) {
         esconderRotulos(desenho.nodes('.rotulado, .foco'));
-        desenho.elements().removeClass('esmaecido ciclo foco rotulado');
+        desenho.elements().removeClass('esmaecido foco rotulado');
     }
     document.querySelectorAll('.componente.selecionada').forEach(item => item.classList.remove('selecionada'));
 }
@@ -411,6 +401,10 @@ function mostrarMetricas(m) {
 
 function mostrarComponentes(componentes) {
     const comCiclo = componentesComCiclo(componentes);
+    if (componentes.length === 0) {
+        $('componentes').replaceChildren('O grafo está vazio: carregue vértices e arestas.');
+        return;
+    }
     if (comCiclo.length === 0) {
         $('componentes').replaceChildren(
             `Nenhum ciclo: as ${componentes.length} componentes são triviais (o grafo é acíclico).`);
@@ -422,32 +416,15 @@ function mostrarComponentes(componentes) {
             criar('small', {}, resumirLista(componente.vertices, 6)));
         item.dataset.id = componente.id;
         item.style.setProperty('--cor', estado.corDaComponente.get(componente.id));
-        item.addEventListener('click', () => protegido(() => selecionarComponente(componente)));
+        item.addEventListener('click', () => selecionarComponente(componente));
         return item;
     }));
 }
 
-async function selecionarComponente(componente) {
+function selecionarComponente(componente) {
     document.querySelectorAll('.componente').forEach(item =>
         item.classList.toggle('selecionada', Number(item.dataset.id) === componente.id));
-    const ciclo = await chamarApi('GET',
-        `/api/projetos/${estado.idDoProjeto}/componentes/${componente.id}/ciclo?nivel=${estado.nivel}`);
-    mostrarCiclo(ciclo);
-    destacar(componente, ciclo);
-}
-
-/** Mostra o ciclo e, no nível de pacotes, quais classes criam cada aresta (onde quebrar o ciclo). */
-function mostrarCiclo(ciclo) {
-    const partes = [criar('div', { className: 'caminho-do-ciclo' }, ciclo.ciclo.join(' → '))];
-    for (const aresta of ciclo.arestas) {
-        const caixa = criar('div', { className: 'evidencia' },
-            criar('strong', {}, `${aresta.origem} → ${aresta.destino}`));
-        if (aresta.dependenciasDeClasses.length) {
-            caixa.append(criar('ul', {}, ...aresta.dependenciasDeClasses.map(par => criar('li', {}, par))));
-        }
-        partes.push(caixa);
-    }
-    $('ciclo').replaceChildren(...partes);
+    destacar(componente);
 }
 
 // ---------- passo a passo ----------
@@ -455,15 +432,17 @@ function mostrarCiclo(ciclo) {
 function mostrarPassos(resultado) {
     const area = $('passos');
     if (resultado.passos.length === 0) {
-        area.replaceChildren(criar('p', { className: 'apagado' }, resultado.observacaoPassos
-            || 'Marque "Registrar passos" e execute novamente para ver Γ⁺ e Γ⁻ de cada iteração.'));
+        const aviso = resultado.observacaoPassos
+            ? [resultado.observacaoPassos]
+            : ['Marque "Registrar passos" e execute novamente para ver ', gama('+'), ' e ', gama('−'), ' de cada iteração.'];
+        area.replaceChildren(criar('p', { className: 'apagado' }, ...aviso));
         return;
     }
     const mostrados = resultado.passos.slice(0, LIMITE_DE_PASSOS_MOSTRADOS).map(passo => {
         const linhas = [
-            ...passo.niveisSucessores.map((nivel, k) => linha(`Γ⁺ nível ${k}`, nivel)),
-            ...passo.niveisAntecessores.map((nivel, k) => linha(`Γ⁻ nível ${k}`, nivel)),
-            linha('Γ⁺ ∩ Γ⁻ (CFC)', passo.componente),
+            ...passo.niveisSucessores.map((nivel, k) => linha([gama('+'), ` nível ${k}`], nivel)),
+            ...passo.niveisAntecessores.map((nivel, k) => linha([gama('−'), ` nível ${k}`], nivel)),
+            linha([gama('+'), ' ∩ ', gama('−'), ' (CFC)'], passo.componente),
         ];
         const aberto = passo.componente.length > 1 && resultado.passos.length <= 30;
         return criar('details', { className: 'passo', open: aberto },
@@ -476,9 +455,17 @@ function mostrarPassos(resultado) {
     }
     area.replaceChildren(...mostrados);
 
-    function linha(rotulo, nomes) {
-        return criar('tr', {}, criar('td', {}, rotulo), criar('td', {}, nomes.join(', ')));
+    function linha(partesDoRotulo, nomes) {
+        return criar('tr', {}, criar('td', {}, ...partesDoRotulo), criar('td', {}, nomes.join(', ')));
     }
+}
+
+/**
+ * Γ⁺ ou Γ⁻ com o sinal num <sup>: os caracteres sobrescritos do Unicode (⁺ ⁻) não existem em
+ * várias fontes, e Γ⁺ e Γ⁻ apareciam iguais na tela.
+ */
+function gama(sinal) {
+    return criar('span', { className: 'gama' }, 'Γ', criar('sup', {}, sinal));
 }
 
 // ---------- abas e eventos ----------
@@ -487,6 +474,11 @@ function mostrarAba(nome) {
     document.querySelectorAll('.abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === nome));
     document.querySelectorAll('.aba').forEach(aba => aba.classList.toggle('ativa', aba.id === 'aba-' + nome));
     if (nome === 'grafo' && desenho) desenho.resize();
+    // a mensagem do vértice clicado só faz sentido na aba do grafo
+    if (nome !== 'grafo' && desenho && desenho.nodes('.foco').nonempty()) {
+        limparDestaque();
+        mostrarMensagem('');
+    }
 }
 
 document.querySelectorAll('.abas button').forEach(botao =>

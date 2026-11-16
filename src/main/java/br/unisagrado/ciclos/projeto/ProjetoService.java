@@ -1,7 +1,6 @@
 package br.unisagrado.ciclos.projeto;
 
 import br.unisagrado.ciclos.algoritmo.PassoMalgrange;
-import br.unisagrado.ciclos.analise.BuscadorDeCiclos;
 import br.unisagrado.ciclos.common.exception.NaoEncontradoException;
 import br.unisagrado.ciclos.extracao.DependenciasDeClasses;
 import br.unisagrado.ciclos.extracao.ExecutorJdeps;
@@ -11,9 +10,7 @@ import br.unisagrado.ciclos.grafo.Digrafo;
 import br.unisagrado.ciclos.grafo.ListaDeArestas;
 import br.unisagrado.ciclos.instancia.InstanciaService;
 import br.unisagrado.ciclos.projeto.dto.response.ArestaResponse;
-import br.unisagrado.ciclos.projeto.dto.response.CicloResponse;
 import br.unisagrado.ciclos.projeto.dto.response.ComponenteResponse;
-import br.unisagrado.ciclos.projeto.dto.response.EvidenciaResponse;
 import br.unisagrado.ciclos.projeto.dto.response.GrafoResponse;
 import br.unisagrado.ciclos.projeto.dto.response.MalgrangeResponse;
 import br.unisagrado.ciclos.projeto.dto.response.NivelResponse;
@@ -34,14 +31,13 @@ import java.util.Map;
 
 /**
  * Carrega projetos (instância pronta, .jar enviado ou lista de arestas) e responde às análises:
- * grafo, Malgrange e ciclo de uma componente.
+ * grafo e Malgrange.
  */
 @Service
 public class ProjetoService {
 
     /** Acima disso, os passos não são registrados (a memória cresce O(V²)). */
     static final int LIMITE_PARA_REGISTRAR_PASSOS = 500;
-    private static final int LIMITE_DE_EVIDENCIAS = 50;
 
     private final ProjetoRepository projetoRepository;
     private final InstanciaService instanciaService;
@@ -145,41 +141,6 @@ public class ProjetoService {
         return new MalgrangeResponse(nivel, analise.metricas(), componentes, passos, observacao);
     }
 
-    /**
-     * Menor ciclo dentro da CFC {@code componente}, passando por {@code inicio} (ou pelo primeiro
-     * vértice da CFC), com as dependências entre classes que justificam cada aresta.
-     */
-    public CicloResponse buscarCiclo(String id, String nivelPedido, int componente, String inicio) {
-        Projeto projeto = buscarProjeto(id);
-        String nivel = projeto.resolverNivel(nivelPedido);
-        Digrafo grafo = projeto.grafo(nivel);
-        List<List<Integer>> componentes = projeto.ultimaAnalise(nivel).resultado().componentes();
-
-        if (componente < 0 || componente >= componentes.size()) {
-            throw new NaoEncontradoException("CFC " + componente + " não existe (há " + componentes.size() + ").");
-        }
-        List<Integer> membros = componentes.get(componente);
-        int verticeInicial = membros.get(0);
-        if (inicio != null) {
-            verticeInicial = grafo.indiceDe(inicio);
-            if (!membros.contains(verticeInicial)) {
-                throw new IllegalArgumentException("\"" + inicio + "\" não pertence à CFC " + componente);
-            }
-        }
-
-        List<Integer> ciclo = BuscadorDeCiclos.menorCicloPassandoPor(grafo, verticeInicial, membros);
-        List<EvidenciaResponse> evidencias = new ArrayList<>();
-        for (int i = 0; i + 1 < ciclo.size(); i++) {
-            int origem = ciclo.get(i);
-            int destino = ciclo.get(i + 1);
-            List<String> classes = Projeto.NIVEL_PACOTES.equals(nivel)
-                    ? dependenciasEntrePacotes(projeto.grafoDeClasses(), grafo.nome(origem), grafo.nome(destino))
-                    : List.of();
-            evidencias.add(new EvidenciaResponse(grafo.nome(origem), grafo.nome(destino), classes));
-        }
-        return new CicloResponse(nivel, componente, nomes(grafo, ciclo), evidencias);
-    }
-
     // ---------- auxiliares ----------
 
     private Projeto buscarProjeto(String id) {
@@ -194,23 +155,6 @@ public class ProjetoService {
             niveis.add(new NivelResponse(entrada.getKey(), grafo.quantidadeVertices(), grafo.quantidadeArestas()));
         }
         return new ProjetoResponse(projeto.id(), projeto.nome(), projeto.origem(), niveis);
-    }
-
-    /** Pares de classes que geram a aresta entre dois pacotes (até LIMITE_DE_EVIDENCIAS). */
-    private static List<String> dependenciasEntrePacotes(Digrafo grafoDeClasses, String pacoteOrigem, String pacoteDestino) {
-        List<String> pares = new ArrayList<>();
-        for (int a = 0; a < grafoDeClasses.quantidadeVertices() && pares.size() < LIMITE_DE_EVIDENCIAS; a++) {
-            if (!MontadorDeGrafos.pacoteDe(grafoDeClasses.nome(a)).equals(pacoteOrigem)) {
-                continue;
-            }
-            for (int b : grafoDeClasses.sucessores(a)) {
-                boolean destinoNoPacote = MontadorDeGrafos.pacoteDe(grafoDeClasses.nome(b)).equals(pacoteDestino);
-                if (destinoNoPacote && pares.size() < LIMITE_DE_EVIDENCIAS) {
-                    pares.add(grafoDeClasses.nome(a) + " -> " + grafoDeClasses.nome(b));
-                }
-            }
-        }
-        return pares;
     }
 
     private static VerticeResponse vertice(String nome, String nivel) {

@@ -30,7 +30,7 @@ class ProjetoControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void instanciaCarregadaPassaPeloMalgrangeECiclo() throws Exception {
+    void instanciaCarregadaPassaPeloMalgrange() throws Exception {
         String projeto = "/api/projetos/" + carregar(post("/api/projetos/instancia/exemplo-sala.txt"));
 
         mockMvc.perform(get(projeto + "/grafo"))
@@ -41,10 +41,8 @@ class ProjetoControllerTest {
                 .andExpect(jsonPath("$.metricas.componentes").value(4))
                 .andExpect(jsonPath("$.metricas.componentesComCiclo").value(3))
                 .andExpect(jsonPath("$.passos[0].pivo").value("A"))
-                .andExpect(jsonPath("$.passos[0].niveisAntecessores[1]", contains("C")));
-        mockMvc.perform(get(projeto + "/componentes/0/ciclo"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ciclo", contains("A", "B", "C", "A")));
+                .andExpect(jsonPath("$.passos[0].niveisAntecessores[1]", contains("C")))
+                .andExpect(jsonPath("$.componentes[0].vertices", contains("A", "C", "B")));
     }
 
     @Test
@@ -69,9 +67,9 @@ class ProjetoControllerTest {
                 .andExpect(jsonPath("$.mensagem", containsString("Linha 2")));
         mockMvc.perform(post("/api/projetos/envio").param("arquivo", "foto.png").content(new byte[] {1}))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/api/projetos/g1/componentes/abc/ciclo"))
+        mockMvc.perform(post("/api/projetos/g1/malgrange").param("passos", "abc"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.mensagem", containsString("componente")));
+                .andExpect(jsonPath("$.mensagem", containsString("passos")));
     }
 
     @Test
