@@ -23,7 +23,7 @@ import java.io.InputStream;
  * POST /api/projetos/envio?arquivo=x.jar                 carrega um .jar/.war (corpo = bytes do arquivo)
  * POST /api/projetos/arestas?nome=...                    carrega uma lista de arestas (corpo = texto)
  * GET  /api/projetos/{id}/grafo?nivel=                   vértices e arestas
- * POST /api/projetos/{id}/malgrange?nivel=&amp;passos=true      executa o Malgrange
+ * GET  /api/projetos/{id}/malgrange?nivel=&amp;passos=true      executa o Malgrange
  * </pre>
  */
 @RestController
@@ -59,7 +59,8 @@ public class ProjetoController {
         return projetoService.buscarGrafo(id, nivel);
     }
 
-    @PostMapping("/{id}/malgrange")
+    /** GET: a execução só calcula e devolve; nada é guardado no servidor. */
+    @GetMapping("/{id}/malgrange")
     public MalgrangeResponse executarMalgrange(@PathVariable String id,
                                                @RequestParam(required = false) String nivel,
                                                @RequestParam(defaultValue = "false") boolean passos) {

@@ -102,7 +102,7 @@ docs/exemplos-api/   exemplos reais das respostas da API
 | POST | `/api/projetos/envio?arquivo=x.jar` | carrega um .jar/.war (corpo = bytes do arquivo) |
 | POST | `/api/projetos/arestas?nome=...` | carrega uma lista de arestas (corpo = texto) |
 | GET | `/api/projetos/{id}/grafo?nivel=` | vértices e arestas |
-| POST | `/api/projetos/{id}/malgrange?nivel=&passos=true` | executa o Malgrange |
+| GET | `/api/projetos/{id}/malgrange?nivel=&passos=true` | executa o Malgrange |
 
 `nivel` é `pacotes`, `classes` ou `informado` (lista de arestas); se omitido, usa o primeiro
 nível do projeto. Os passos (`passos=true`) só são registrados para grafos de até 500 vértices.

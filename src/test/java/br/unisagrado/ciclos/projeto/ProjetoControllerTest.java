@@ -36,7 +36,7 @@ class ProjetoControllerTest {
         mockMvc.perform(get(projeto + "/grafo"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.vertices", hasSize(9)));
-        mockMvc.perform(post(projeto + "/malgrange").param("passos", "true"))
+        mockMvc.perform(get(projeto + "/malgrange").param("passos", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.metricas.componentes").value(4))
                 .andExpect(jsonPath("$.metricas.componentesComCiclo").value(3))
@@ -68,7 +68,7 @@ class ProjetoControllerTest {
                 .andExpect(jsonPath("$.mensagem", containsString("Linha 2")));
         mockMvc.perform(post("/api/projetos/envio").param("arquivo", "foto.png").content(new byte[] {1}))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(post("/api/projetos/g1/malgrange").param("passos", "abc"))
+        mockMvc.perform(get("/api/projetos/g1/malgrange").param("passos", "abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensagem", containsString("passos")));
     }

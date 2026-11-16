@@ -354,7 +354,7 @@ function aplicarFiltroDeCiclos() {
 
 async function executarMalgrange() {
     const registrarPassos = $('registrar-passos').checked;
-    const resultado = await chamarApi('POST',
+    const resultado = await chamarApi('GET',
         `/api/projetos/${estado.idDoProjeto}/malgrange?nivel=${estado.nivel}&passos=${registrarPassos}`);
     estado.resultado = resultado;
 
