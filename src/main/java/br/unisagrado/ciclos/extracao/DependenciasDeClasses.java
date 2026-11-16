@@ -9,7 +9,7 @@ import java.util.Set;
  * @param classes      todas as classes de nível superior do projeto (classes internas, como
  *                     {@code Foo$Bar}, já foram agrupadas em {@code Foo})
  * @param dependencias pares "classe de origem usa classe de destino"; os dois lados pertencem
- *                     a {@code classes}. Pares repetidos são mantidos e viram peso no grafo.
+ *                     a {@code classes}. Pares repetidos viram uma única aresta no grafo.
  */
 public record DependenciasDeClasses(
         Set<String> classes,

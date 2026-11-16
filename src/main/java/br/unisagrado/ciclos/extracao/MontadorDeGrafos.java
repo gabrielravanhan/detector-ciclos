@@ -10,10 +10,9 @@ import java.util.TreeSet;
  * Monta os grafos de dependência a partir das dependências entre classes.
  *
  * <ul>
- *   <li><b>Grafo de classes:</b> vértice = classe; aresta A → B se A usa B;
- *       peso = número de referências registradas pelo jdeps.</li>
+ *   <li><b>Grafo de classes:</b> vértice = classe; aresta A → B se A usa B.</li>
  *   <li><b>Grafo de pacotes:</b> vértice = pacote; aresta P → Q se alguma classe de P usa
- *       alguma classe de Q; peso = número de pares de classes (A em P, B em Q) com A → B.</li>
+ *       alguma classe de Q.</li>
  * </ul>
  * Os vértices são inseridos em ordem alfabética para que o resultado seja sempre o mesmo.
  */
@@ -49,7 +48,7 @@ public final class MontadorDeGrafos {
             int pacoteOrigem = grafo.indiceDe(pacoteDe(grafoDeClasses.nome(origem)));
             for (int destino : grafoDeClasses.sucessores(origem)) {
                 int pacoteDestino = grafo.indiceDe(pacoteDe(grafoDeClasses.nome(destino)));
-                grafo.adicionarAresta(pacoteOrigem, pacoteDestino, 1); // mesmo pacote: o Digrafo ignora o laço
+                grafo.adicionarAresta(pacoteOrigem, pacoteDestino); // mesmo pacote: o Digrafo ignora o laço
             }
         }
         return grafo;

@@ -175,7 +175,7 @@ public class ProjetoService {
             List<String> classes = Projeto.NIVEL_PACOTES.equals(nivel)
                     ? dependenciasEntrePacotes(projeto.grafoDeClasses(), grafo.nome(origem), grafo.nome(destino))
                     : List.of();
-            evidencias.add(new EvidenciaResponse(grafo.nome(origem), grafo.nome(destino), grafo.peso(origem, destino), classes));
+            evidencias.add(new EvidenciaResponse(grafo.nome(origem), grafo.nome(destino), classes));
         }
         return new CicloResponse(nivel, componente, nomes(grafo, ciclo), evidencias);
     }
@@ -225,7 +225,7 @@ public class ProjetoService {
         List<ArestaResponse> arestas = new ArrayList<>();
         for (int v = 0; v < grafo.quantidadeVertices(); v++) {
             for (int w : grafo.sucessores(v)) {
-                arestas.add(new ArestaResponse(grafo.nome(v), grafo.nome(w), grafo.peso(v, w)));
+                arestas.add(new ArestaResponse(grafo.nome(v), grafo.nome(w)));
             }
         }
         return arestas;

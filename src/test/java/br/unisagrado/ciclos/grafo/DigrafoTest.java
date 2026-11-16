@@ -41,15 +41,15 @@ class DigrafoTest {
     }
 
     @Test
-    void arestaRepetidaSomaPesoEmVezDeDuplicar() {
+    void arestaRepetidaEhGuardadaUmaVezSo() {
         Digrafo grafo = new Digrafo();
         grafo.adicionarAresta("A", "B");
         grafo.adicionarAresta("A", "B");
-        grafo.adicionarAresta(grafo.indiceDe("A"), grafo.indiceDe("B"), 3);
+        grafo.adicionarAresta(grafo.indiceDe("A"), grafo.indiceDe("B"));
 
         assertEquals(1, grafo.quantidadeArestas());
-        assertEquals(5, grafo.peso(grafo.indiceDe("A"), grafo.indiceDe("B")));
-        assertEquals(0, grafo.peso(grafo.indiceDe("B"), grafo.indiceDe("A")), "aresta inexistente tem peso 0");
+        assertEquals(Set.of(grafo.indiceDe("B")), grafo.sucessores(grafo.indiceDe("A")));
+        assertEquals(Set.of(grafo.indiceDe("A")), grafo.antecessores(grafo.indiceDe("B")));
     }
 
     @Test
@@ -63,13 +63,12 @@ class DigrafoTest {
     }
 
     @Test
-    void rejeitaPesoInvalidoEVerticeInexistente() {
+    void rejeitaVerticeInexistente() {
         Digrafo grafo = new Digrafo();
         grafo.adicionarVertice("A");
         grafo.adicionarVertice("B");
 
-        assertThrows(IllegalArgumentException.class, () -> grafo.adicionarAresta(0, 1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> grafo.adicionarAresta(0, 7, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> grafo.adicionarAresta(0, 7));
         assertThrows(IndexOutOfBoundsException.class, () -> grafo.nome(-1));
     }
 }

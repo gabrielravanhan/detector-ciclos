@@ -9,8 +9,7 @@ import java.util.regex.Pattern;
  *
  * <pre>
  * # comentário
- * A -&gt; B          aresta de peso 1
- * A -&gt; C 3        aresta de peso 3
+ * A -&gt; B          aresta de A para B
  * D               vértice isolado
  * </pre>
  * A ordem dos vértices segue a primeira aparição no texto; é nessa ordem que o Malgrange
@@ -18,7 +17,7 @@ import java.util.regex.Pattern;
  */
 public final class ListaDeArestas {
 
-    private static final Pattern ARESTA = Pattern.compile("^(\\S+)\\s*->\\s*(\\S+)(?:\\s+(\\d{1,9}))?$");
+    private static final Pattern ARESTA = Pattern.compile("^(\\S+)\\s*->\\s*(\\S+)$");
     private static final Pattern VERTICE = Pattern.compile("^(\\S+)$");
 
     private ListaDeArestas() {
@@ -36,18 +35,12 @@ public final class ListaDeArestas {
             Matcher aresta = ARESTA.matcher(linha);
             Matcher vertice = VERTICE.matcher(linha);
             if (aresta.matches()) {
-                int peso = aresta.group(3) == null ? 1 : Integer.parseInt(aresta.group(3));
-                if (peso <= 0) {
-                    throw new IllegalArgumentException("Linha " + (i + 1) + ": o peso deve ser positivo");
-                }
-                int origem = grafo.adicionarVertice(aresta.group(1));
-                int destino = grafo.adicionarVertice(aresta.group(2));
-                grafo.adicionarAresta(origem, destino, peso);
+                grafo.adicionarAresta(aresta.group(1), aresta.group(2));
             } else if (vertice.matches()) {
                 grafo.adicionarVertice(vertice.group(1));
             } else {
                 throw new IllegalArgumentException("Linha " + (i + 1) + " inválida: \"" + linhas[i].trim()
-                        + "\". Use \"A -> B\" ou \"A -> B peso\".");
+                        + "\". Use \"A -> B\" para uma aresta ou só \"A\" para um vértice isolado.");
             }
         }
         return grafo;
@@ -62,12 +55,7 @@ public final class ListaDeArestas {
                 texto.append(grafo.nome(v)).append('\n');
             }
             for (int w : grafo.sucessores(v)) {
-                texto.append(grafo.nome(v)).append(" -> ").append(grafo.nome(w));
-                int peso = grafo.peso(v, w);
-                if (peso != 1) {
-                    texto.append(' ').append(peso);
-                }
-                texto.append('\n');
+                texto.append(grafo.nome(v)).append(" -> ").append(grafo.nome(w)).append('\n');
             }
         }
         return texto.toString();

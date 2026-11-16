@@ -124,7 +124,7 @@ class MalgrangeTest {
             for (int u = 0; u < n; u++) {
                 for (int v = 0; v < n; v++) {
                     if (aleatorio.nextDouble() < densidade) {
-                        grafo.adicionarAresta(u, v, 1);
+                        grafo.adicionarAresta(u, v);
                     }
                 }
             }

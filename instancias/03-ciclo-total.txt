@@ -6,5 +6,5 @@ com.app.repository -> com.app.model
 com.app.model -> com.app.util
 com.app.util -> com.app.config
 com.app.config -> com.app.web
-com.app.service -> com.app.util 3
+com.app.service -> com.app.util
 com.app.model -> com.app.web

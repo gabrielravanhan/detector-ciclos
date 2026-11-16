@@ -233,7 +233,7 @@ function desenharGrafo() {
             tamanho: 12 + 4 * Math.sqrt(grau.get(v.id)),
             ...(porClasse ? { parent: PREFIXO_DA_CAIXA_DE_PACOTE + v.grupo } : {}),
         } })),
-        ...arestas.map((a, i) => ({ data: { id: 'a' + i, source: a.origem, target: a.destino, peso: a.peso } })),
+        ...arestas.map((a, i) => ({ data: { id: 'a' + i, source: a.origem, target: a.destino } })),
     ];
 
     desenho = cytoscape({
@@ -441,7 +441,7 @@ function mostrarCiclo(ciclo) {
     const partes = [criar('div', { className: 'caminho-do-ciclo' }, ciclo.ciclo.join(' → '))];
     for (const aresta of ciclo.arestas) {
         const caixa = criar('div', { className: 'evidencia' },
-            criar('strong', {}, `${aresta.origem} → ${aresta.destino}`), ` (peso ${aresta.peso})`);
+            criar('strong', {}, `${aresta.origem} → ${aresta.destino}`));
         if (aresta.dependenciasDeClasses.length) {
             caixa.append(criar('ul', {}, ...aresta.dependenciasDeClasses.map(par => criar('li', {}, par))));
         }

@@ -50,11 +50,11 @@ class ProjetoControllerTest {
     @Test
     void listaDeArestasVemNoCorpoEPodeSerExportada() throws Exception {
         String id = carregar(post("/api/projetos/arestas").param("nome", "manual")
-                .contentType(MediaType.TEXT_PLAIN).content("x -> y\ny -> x 3"));
+                .contentType(MediaType.TEXT_PLAIN).content("x -> y\ny -> x"));
 
         mockMvc.perform(get("/api/projetos/" + id + "/exportar"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("y -> x 3")));
+                .andExpect(content().string(containsString("y -> x")));
     }
 
     @Test

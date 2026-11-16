@@ -39,43 +39,33 @@
   } ],
   "arestas" : [ {
     "origem" : "A",
-    "destino" : "B",
-    "peso" : 1
+    "destino" : "B"
   }, {
     "origem" : "B",
-    "destino" : "C",
-    "peso" : 1
+    "destino" : "C"
   }, {
     "origem" : "B",
-    "destino" : "D",
-    "peso" : 1
+    "destino" : "D"
   }, {
     "origem" : "C",
-    "destino" : "A",
-    "peso" : 1
+    "destino" : "A"
   }, {
     "origem" : "D",
-    "destino" : "E",
-    "peso" : 1
+    "destino" : "E"
   }, {
     "origem" : "E",
-    "destino" : "F",
-    "peso" : 1
+    "destino" : "F"
   }, {
     "origem" : "F",
-    "destino" : "D",
-    "peso" : 1
+    "destino" : "D"
   }, {
     "origem" : "G",
-    "destino" : "F",
-    "peso" : 1
+    "destino" : "F"
   }, {
     "origem" : "G",
-    "destino" : "H",
-    "peso" : 1
+    "destino" : "H"
   }, {
     "origem" : "H",
-    "destino" : "G",
-    "peso" : 1
+    "destino" : "G"
   } ]
 }

@@ -6,7 +6,6 @@ import java.util.List;
 public record EvidenciaResponse(
         String origem,
         String destino,
-        int peso,
         List<String> dependenciasDeClasses
 ) {
 }

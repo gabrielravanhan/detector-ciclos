@@ -56,10 +56,9 @@ o Cytoscape.js vai empacotado dentro do jar.
 | Vértice | pacote Java | classe de nível superior |
 | Aresta | P → Q se alguma classe de P usa alguma de Q | A → B se A referencia B |
 | Direcionado | sim | sim |
-| Peso | nº de pares de classes que geram a aresta | nº de referências |
+| Ponderado | não | não |
 
-- O peso **não é usado** pelo Malgrange; serve para indicar quais dependências são mais fracas
-  e, portanto, mais baratas de remover para quebrar um ciclo.
+- Dependências repetidas viram uma única aresta.
 - Laços (A → A) são ignorados.
 - Classes internas e anônimas (`Foo$Bar`, `Foo$1`) são agrupadas na classe de nível superior.
 - Apenas dependências internas ao projeto analisado são consideradas (`java.*` e bibliotecas
@@ -81,7 +80,7 @@ Controller → Service → Repository.
 ```
 src/main/java/br/unisagrado/ciclos/
   Application.java   ponto de entrada (Spring Boot)
-  grafo/             Digrafo: grafo direcionado ponderado (implementação própria); lista de arestas
+  grafo/             Digrafo: grafo direcionado (implementação própria); lista de arestas
   algoritmo/         Malgrange (+ registro dos passos)
   analise/           menor ciclo, métricas
   extracao/          jdeps → dependências entre classes → grafos de classes e de pacotes
@@ -133,8 +132,7 @@ Formato da lista de arestas:
 
 ```
 # comentário
-A -> B          aresta de peso 1
-A -> C 3        aresta de peso 3
+A -> B          aresta de A para B
 D               vértice isolado
 ```
 

@@ -5,17 +5,14 @@
   "arestas" : [ {
     "origem" : "A",
     "destino" : "B",
-    "peso" : 1,
     "dependenciasDeClasses" : [ ]
   }, {
     "origem" : "B",
     "destino" : "C",
-    "peso" : 1,
     "dependenciasDeClasses" : [ ]
   }, {
     "origem" : "C",
     "destino" : "A",
-    "peso" : 1,
     "dependenciasDeClasses" : [ ]
   } ]
 }

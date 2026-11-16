@@ -9,19 +9,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ListaDeArestasTest {
 
     @Test
-    void leArestasPesosEVerticesIsolados() {
+    void leArestasEVerticesIsolados() {
         Digrafo grafo = ListaDeArestas.ler("""
                 # exemplo
                 A -> B
-                B -> C 3
+                B -> C
 
                 D          # vértice isolado
                 """);
 
         assertEquals(4, grafo.quantidadeVertices());
         assertEquals(2, grafo.quantidadeArestas());
-        assertEquals(1, grafo.peso(grafo.indiceDe("A"), grafo.indiceDe("B")));
-        assertEquals(3, grafo.peso(grafo.indiceDe("B"), grafo.indiceDe("C")));
+        assertTrue(grafo.sucessores(grafo.indiceDe("A")).contains(grafo.indiceDe("B")));
+        assertTrue(grafo.sucessores(grafo.indiceDe("B")).contains(grafo.indiceDe("C")));
         assertTrue(grafo.sucessores(grafo.indiceDe("D")).isEmpty());
     }
 
@@ -50,7 +50,7 @@ class ListaDeArestasTest {
 
     @Test
     void escreverELerReconstroemOMesmoTexto() {
-        String texto = "a -> b\nb -> c 3\nd\n";
+        String texto = "a -> b\nb -> c\nd\n";
 
         assertEquals(texto, ListaDeArestas.escrever(ListaDeArestas.ler(texto)));
     }
@@ -64,10 +64,10 @@ class ListaDeArestasTest {
     }
 
     @Test
-    void pesoZeroEhRejeitado() {
+    void numeroDepoisDaArestaEhRejeitado() {
         IllegalArgumentException erro = assertThrows(IllegalArgumentException.class,
-                () -> ListaDeArestas.ler("a -> b 0"));
+                () -> ListaDeArestas.ler("a -> b 3"));
 
-        assertTrue(erro.getMessage().contains("peso"), erro.getMessage());
+        assertTrue(erro.getMessage().contains("Linha 1"), erro.getMessage());
     }
 }

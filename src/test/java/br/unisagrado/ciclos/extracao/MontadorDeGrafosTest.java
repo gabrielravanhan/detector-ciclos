@@ -4,31 +4,34 @@ import br.unisagrado.ciclos.grafo.Digrafo;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MontadorDeGrafosTest {
 
     private final DependenciasDeClasses dependencias = LeitorSaidaJdeps.ler(LeitorSaidaJdepsTest.EXEMPLO_DE_SAIDA);
 
     @Test
-    void grafoDeClassesSomaReferenciasRepetidas() {
+    void grafoDeClassesJuntaReferenciasRepetidasNumaAresta() {
         Digrafo classes = MontadorDeGrafos.grafoDeClasses(dependencias);
 
         int controller = classes.indiceDe("com.app.web.Controller");
         int service = classes.indiceDe("com.app.service.Service");
         assertEquals(2, classes.quantidadeVertices());
-        assertEquals(2, classes.peso(controller, service), "Controller e Controller$1 usam Service");
-        assertEquals(1, classes.peso(service, controller));
+        assertEquals(2, classes.quantidadeArestas(), "Controller e Controller$1 usam Service: uma aresta só");
+        assertTrue(classes.sucessores(controller).contains(service));
+        assertTrue(classes.sucessores(service).contains(controller));
     }
 
     @Test
-    void grafoDePacotesContaParesDeClasses() {
+    void grafoDePacotesLigaOsPacotesDasClasses() {
         Digrafo pacotes = MontadorDeGrafos.grafoDePacotes(MontadorDeGrafos.grafoDeClasses(dependencias));
 
         int web = pacotes.indiceDe("com.app.web");
         int service = pacotes.indiceDe("com.app.service");
         assertEquals(2, pacotes.quantidadeVertices());
-        assertEquals(1, pacotes.peso(web, service), "um par de classes: Controller → Service");
-        assertEquals(1, pacotes.peso(service, web));
+        assertEquals(2, pacotes.quantidadeArestas());
+        assertTrue(pacotes.sucessores(web).contains(service));
+        assertTrue(pacotes.sucessores(service).contains(web));
     }
 
     @Test
