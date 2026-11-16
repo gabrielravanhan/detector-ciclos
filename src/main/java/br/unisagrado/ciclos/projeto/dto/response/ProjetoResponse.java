@@ -6,7 +6,6 @@ import java.util.List;
 public record ProjetoResponse(
         String id,
         String nome,
-        String origem,
         List<NivelResponse> niveis
 ) {
 }

@@ -19,9 +19,9 @@ public class ProjetoRepository {
     private final AtomicInteger proximoId = new AtomicInteger(1);
 
     /** @param grafos nível → grafo; o primeiro nível é o padrão */
-    public Projeto criar(String nome, String origem, Map<String, Digrafo> grafos) {
+    public Projeto criar(String nome, Map<String, Digrafo> grafos) {
         String id = "g" + proximoId.getAndIncrement();
-        Projeto projeto = new Projeto(id, nome, origem, grafos);
+        Projeto projeto = new Projeto(id, nome, grafos);
         projetos.put(id, projeto);
         return projeto;
     }

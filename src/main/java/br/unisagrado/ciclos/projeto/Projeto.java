@@ -27,14 +27,12 @@ public final class Projeto {
 
     private final String id;
     private final String nome;
-    private final String origem;
     private final Map<String, Digrafo> grafos;
 
     /** @param grafos nível → grafo; o primeiro nível é o padrão */
-    public Projeto(String id, String nome, String origem, Map<String, Digrafo> grafos) {
+    public Projeto(String id, String nome, Map<String, Digrafo> grafos) {
         this.id = id;
         this.nome = nome;
-        this.origem = origem;
         this.grafos = grafos;
     }
 
@@ -44,10 +42,6 @@ public final class Projeto {
 
     public String nome() {
         return nome;
-    }
-
-    public String origem() {
-        return origem;
     }
 
     public Map<String, Digrafo> grafos() {

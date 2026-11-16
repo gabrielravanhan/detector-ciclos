@@ -15,8 +15,8 @@ class ProjetoRepositoryTest {
 
     @Test
     void cadaProjetoRecebeUmIdEPodeSerBuscado() {
-        Projeto primeiro = projetoRepository.criar("1", "lista de arestas", Map.of(Projeto.NIVEL_INFORMADO, new Digrafo()));
-        Projeto segundo = projetoRepository.criar("2", "lista de arestas", Map.of(Projeto.NIVEL_INFORMADO, new Digrafo()));
+        Projeto primeiro = projetoRepository.criar("1", Map.of(Projeto.NIVEL_INFORMADO, new Digrafo()));
+        Projeto segundo = projetoRepository.criar("2", Map.of(Projeto.NIVEL_INFORMADO, new Digrafo()));
 
         assertNotEquals(primeiro.id(), segundo.id());
         assertSame(segundo, projetoRepository.buscarPorId(segundo.id()).orElseThrow());

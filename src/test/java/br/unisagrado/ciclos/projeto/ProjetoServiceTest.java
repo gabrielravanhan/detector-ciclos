@@ -48,7 +48,6 @@ class ProjetoServiceTest {
 
         assertEquals(List.of(Projeto.NIVEL_PACOTES, Projeto.NIVEL_CLASSES),
                 projeto.niveis().stream().map(NivelResponse::nivel).toList());
-        assertEquals("jar", projeto.origem());
         GrafoResponse classes = projetoService.buscarGrafo(projeto.id(), Projeto.NIVEL_CLASSES);
         assertTrue(classes.vertices().stream().anyMatch(v -> v.id().equals("br.unisagrado.ciclos.algoritmo.Malgrange")));
     }
@@ -112,7 +111,7 @@ class ProjetoServiceTest {
         Map<String, Digrafo> grafos = new LinkedHashMap<>();
         grafos.put(Projeto.NIVEL_PACOTES, MontadorDeGrafos.grafoDePacotes(classes));
         grafos.put(Projeto.NIVEL_CLASSES, classes);
-        String comCiclo = projetoRepository.criar("app", "jar", grafos).id();
+        String comCiclo = projetoRepository.criar("app", grafos).id();
 
         MalgrangeResponse resposta = projetoService.executarMalgrange(comCiclo, Projeto.NIVEL_PACOTES, false);
 

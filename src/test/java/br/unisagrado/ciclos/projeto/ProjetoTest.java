@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ProjetoTest {
 
-    private final Projeto projeto = new Projeto("g1", "ciclo", "lista de arestas",
+    private final Projeto projeto = new Projeto("g1", "ciclo",
             new LinkedHashMap<>(Map.of(Projeto.NIVEL_INFORMADO, ListaDeArestas.ler("a -> b\nb -> a"))));
 
     @Test

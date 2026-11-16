@@ -1,7 +1,6 @@
 {
   "id" : "g2",
   "nome" : "gson-2.10.1.jar",
-  "origem" : "jar",
   "niveis" : [ {
     "nivel" : "pacotes",
     "vertices" : 9,

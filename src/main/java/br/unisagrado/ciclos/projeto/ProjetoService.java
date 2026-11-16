@@ -81,14 +81,14 @@ public class ProjetoService {
         Map<String, Digrafo> grafos = new LinkedHashMap<>();
         grafos.put(Projeto.NIVEL_PACOTES, MontadorDeGrafos.grafoDePacotes(grafoDeClasses));
         grafos.put(Projeto.NIVEL_CLASSES, grafoDeClasses);
-        return resumo(projetoRepository.criar(nome, "jar", grafos));
+        return resumo(projetoRepository.criar(nome, grafos));
     }
 
     public ProjetoResponse carregarArestas(String texto, String nome) {
         String nomeFinal = nome == null || nome.isBlank() ? "grafo manual" : nome;
         Map<String, Digrafo> grafos = new LinkedHashMap<>();
         grafos.put(Projeto.NIVEL_INFORMADO, ListaDeArestas.ler(texto == null ? "" : texto));
-        return resumo(projetoRepository.criar(nomeFinal, "lista de arestas", grafos));
+        return resumo(projetoRepository.criar(nomeFinal, grafos));
     }
 
     // ---------- consultas ----------
@@ -149,7 +149,7 @@ public class ProjetoService {
             Digrafo grafo = entrada.getValue();
             niveis.add(new NivelResponse(entrada.getKey(), grafo.quantidadeVertices(), grafo.quantidadeArestas()));
         }
-        return new ProjetoResponse(projeto.id(), projeto.nome(), projeto.origem(), niveis);
+        return new ProjetoResponse(projeto.id(), projeto.nome(), niveis);
     }
 
     private static VerticeResponse vertice(String nome, String nivel) {

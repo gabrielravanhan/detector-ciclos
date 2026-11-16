@@ -130,7 +130,7 @@ class MalgrangeTest {
             }
 
             ResultadoMalgrange resultado = Malgrange.executar(grafo, false);
-            int[] componenteDe = resultado.componenteDe(n);
+            int[] componenteDe = componenteDeCadaVertice(resultado, n);
             assertEquals(n, resultado.componentes().stream().mapToInt(List::size).sum(),
                     "cada vértice deve estar em exatamente uma CFC");
 
@@ -143,6 +143,17 @@ class MalgrangeTest {
                 }
             }
         }
+    }
+
+    /** componenteDe[v] = índice da CFC que contém o vértice v. */
+    private static int[] componenteDeCadaVertice(ResultadoMalgrange resultado, int quantidadeVertices) {
+        int[] componenteDe = new int[quantidadeVertices];
+        for (int c = 0; c < resultado.componentes().size(); c++) {
+            for (int vertice : resultado.componentes().get(c)) {
+                componenteDe[vertice] = c;
+            }
+        }
+        return componenteDe;
     }
 
     /** alcanca[u][v] = existe caminho de u até v (busca em profundidade a partir de cada vértice). */
