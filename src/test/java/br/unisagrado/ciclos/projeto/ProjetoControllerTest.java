@@ -46,13 +46,14 @@ class ProjetoControllerTest {
     }
 
     @Test
-    void listaDeArestasVemNoCorpoEPodeSerExportada() throws Exception {
+    void listaDeArestasVemNoCorpoDaRequisicao() throws Exception {
         String id = carregar(post("/api/projetos/arestas").param("nome", "manual")
                 .contentType(MediaType.TEXT_PLAIN).content("x -> y\ny -> x"));
 
-        mockMvc.perform(get("/api/projetos/" + id + "/exportar"))
+        mockMvc.perform(get("/api/projetos/" + id + "/grafo"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("y -> x")));
+                .andExpect(jsonPath("$.vertices", hasSize(2)))
+                .andExpect(jsonPath("$.arestas", hasSize(2)));
     }
 
     @Test

@@ -105,11 +105,6 @@ public class ProjetoService {
         return new GrafoResponse(nivel, vertices, arestas(grafo));
     }
 
-    /** O grafo como lista de arestas (texto), para usar em outras ferramentas. */
-    public String exportar(String id, String nivel) {
-        return ListaDeArestas.escrever(buscarProjeto(id).grafo(nivel));
-    }
-
     /** Executa o Malgrange; os passos só são registrados para grafos de até LIMITE_PARA_REGISTRAR_PASSOS vértices. */
     public MalgrangeResponse executarMalgrange(String id, String nivelPedido, boolean passosPedidos) {
         Projeto projeto = buscarProjeto(id);

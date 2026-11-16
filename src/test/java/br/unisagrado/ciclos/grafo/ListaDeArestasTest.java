@@ -49,13 +49,6 @@ class ListaDeArestasTest {
     }
 
     @Test
-    void escreverELerReconstroemOMesmoTexto() {
-        String texto = "a -> b\nb -> c\nd\n";
-
-        assertEquals(texto, ListaDeArestas.escrever(ListaDeArestas.ler(texto)));
-    }
-
-    @Test
     void linhaInvalidaInformaONumeroDaLinha() {
         IllegalArgumentException erro = assertThrows(IllegalArgumentException.class,
                 () -> ListaDeArestas.ler("a -> b\na b c d"));

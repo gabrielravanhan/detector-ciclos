@@ -23,7 +23,6 @@ import java.io.InputStream;
  * POST /api/projetos/envio?arquivo=x.jar                 carrega um .jar/.war (corpo = bytes do arquivo)
  * POST /api/projetos/arestas?nome=...                    carrega uma lista de arestas (corpo = texto)
  * GET  /api/projetos/{id}/grafo?nivel=                   vértices e arestas
- * GET  /api/projetos/{id}/exportar?nivel=                o grafo como lista de arestas (texto)
  * POST /api/projetos/{id}/malgrange?nivel=&amp;passos=true      executa o Malgrange
  * </pre>
  */
@@ -58,11 +57,6 @@ public class ProjetoController {
     @GetMapping("/{id}/grafo")
     public GrafoResponse buscarGrafo(@PathVariable String id, @RequestParam(required = false) String nivel) {
         return projetoService.buscarGrafo(id, nivel);
-    }
-
-    @GetMapping(value = "/{id}/exportar", produces = "text/plain;charset=UTF-8")
-    public String exportar(@PathVariable String id, @RequestParam(required = false) String nivel) {
-        return projetoService.exportar(id, nivel);
     }
 
     @PostMapping("/{id}/malgrange")

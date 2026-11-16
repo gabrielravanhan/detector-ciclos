@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 /**
  * Formato textual simples de grafo, usado para montar instâncias à mão (inclusive durante a
- * apresentação) e para exportar grafos para validação externa.
+ * apresentação).
  *
  * <pre>
  * # comentário
@@ -44,21 +44,6 @@ public final class ListaDeArestas {
             }
         }
         return grafo;
-    }
-
-    /** Gera o texto do grafo; {@code ler(escrever(g))} reconstrói o mesmo grafo. */
-    public static String escrever(Digrafo grafo) {
-        StringBuilder texto = new StringBuilder();
-        for (int v = 0; v < grafo.quantidadeVertices(); v++) {
-            boolean isolado = grafo.sucessores(v).isEmpty() && grafo.antecessores(v).isEmpty();
-            if (isolado) {
-                texto.append(grafo.nome(v)).append('\n');
-            }
-            for (int w : grafo.sucessores(v)) {
-                texto.append(grafo.nome(v)).append(" -> ").append(grafo.nome(w)).append('\n');
-            }
-        }
-        return texto.toString();
     }
 
     private static String removerComentario(String linha) {
