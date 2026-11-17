@@ -6,15 +6,17 @@ grafo de dependências.
 
 Trabalho da disciplina de Teoria dos Grafos — Tema 4 (Algoritmo de Malgrange).
 
+Repositório: <https://github.com/gabrielravanhan/detector-ciclos>
+
 ## Integrantes
 
-| Nome | Responsabilidade |
-|---|---|
-| _(preencher)_ | Backend Java: extração, grafo, Malgrange, API |
-| _(preencher)_ | Frontend: visualização do grafo e das componentes |
-| _(preencher)_ | Frontend: passo a passo do Malgrange (Γ⁺ / Γ⁻) e métricas |
-| _(preencher)_ | Validação independente, gerador de grafos, medições de tempo |
-| _(preencher)_ | Instâncias de teste, comparação entre versões, relatório |
+- Échelly Paiva
+- Gabriel José Soto Ravanhan
+- João Luiz Casagrande
+- Samuel Fernandes Monteiro
+- Vitor Sanches
+
+As contribuições de cada integrante estão no relatório técnico.
 
 ## Requisitos
 
@@ -153,12 +155,9 @@ D               vértice isolado
 | hibernate-core 6.5.2 | pacotes | 344 | 5.794 | 20 | 2 | 323 | 94,8% |
 | hibernate-core 6.5.2 | classes | 4.892 | 48.329 | 1.476 | 16 | 3.387 | 70,2% |
 
-O Malgrange leva menos de 1 ms nas instâncias pequenas e algumas dezenas de milissegundos no
-grafo de classes do Hibernate (o tempo exato aparece nas métricas de cada execução).
-
 ## Bibliotecas utilizadas
 
-Nenhuma biblioteca de grafos é usada: o grafo e o Malgrange foram implementados pelo grupo.
+Nenhuma biblioteca de grafos é usada: o grafo e o Malgrange foram implementados.
 
 | Biblioteca | Uso |
 |---|---|
@@ -194,5 +193,18 @@ Nenhuma biblioteca de grafos é usada: o grafo e o Malgrange foram implementados
 
 ## Uso de Inteligência Artificial
 
-_(preencher conforme a seção 7 do enunciado: ferramentas, etapas, conteúdos gerados e como
-foram revisados)_
+O grupo usou o **Claude Code** (Anthropic), assistente de programação baseado em IA, como apoio
+em todas as etapas. A maior parte do código, dos testes, deste README e o rascunho do relatório
+foram gerados com ele, sob a direção do grupo.
+
+- **Etapas:** definição do projeto e da modelagem; implementação do núcleo (`Digrafo`,
+  `Malgrange`, extração com jdeps); API em Spring Boot; interface web; testes automatizados;
+  verificação da interface no navegador; documentação.
+- **Decisões do grupo:** escolha do problema; nomes em português; troca do Javalin pelo Spring
+  Boot, tecnologia que o grupo conhece; retirada do grafo condensado, dos pesos e do ciclo de
+  exemplo, que não acrescentavam ao objetivo.
+- **Revisão e validação:** os 53 testes automatizados, incluindo a comparação do Malgrange com a
+  definição de CFC em 300 grafos aleatórios; o exemplo de sala calculado à mão e comparado com a
+  aplicação; a execução da interface com todas as instâncias; e a leitura do código a cada etapa.
+
+A declaração completa está na seção 11 do relatório técnico.
